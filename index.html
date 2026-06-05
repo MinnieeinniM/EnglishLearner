@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0F0F0F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="26秒">
+<link rel="manifest" href="manifest.json">
+<title>26秒 — 極速單字記憶</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F0F0F;
+    --surface: #1A1A1A;
+    --surface2: #242424;
+    --surface3: #2E2E2E;
+    --border: rgba(255,255,255,0.08);
+    --text: #FAFAFA;
+    --text2: #A0A0A0;
+    --text3: #6A6A6A;
+    --accent: #7BFF6A;
+    --accent-dim: rgba(123,255,106,0.12);
+    --danger: #FF6B6B;
+    --danger-dim: rgba(255,107,107,0.12);
+    --warning: #FFD166;
+    --info: #74B9FF;
+    --radius: 20px;
+    --radius-sm: 12px;
+    --font: 'Space Grotesk', 'Noto Sans TC', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; background: var(--bg); font-family: var(--font); color: var(--text); }
+  
+  /* ── SCREENS ── */
+  .screen { position: absolute; inset: 0; display: none; flex-direction: column; }
+  .screen.active { display: flex; }
+  
+  /* ── HOME SCREEN ── */
+  #home {
+    background: var(--bg);
+    padding: env(safe-area-inset-top, 48px) 0 env(safe-area-inset-bottom, 24px);
+    overflow-y: auto;
+  }
+  .home-header {
+    padding: 24px 24px 0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo {
+    font-size: 28px; font-weight: 900; letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--accent) 0%, #A8FF78 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .streak-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 999px; padding: 8px 14px;
+    font-size: 13px; font-weight: 500; color: var(--warning);
+  }
+  .streak-badge span { font-size: 16px; }
+  .home-hero {
+    padding: 32px 24px 0;
+  }
+  .home-hero h1 { font-size: 32px; font-weight: 700; line-height: 1.2; letter-spacing: -0.5px; }
+  .home-hero h1 em { font-style: normal; color: var(--accent); }
+  .home-hero p { margin-top: 8px; color: var(--text2); font-size: 15px; line-height: 1.6; }
+
+  .progress-ring-wrap {
+    margin: 28px 24px 0;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 24px;
+    display: flex; align-items: center; gap: 24px;
+  }
+  .ring-svg { flex-shrink: 0; }
+  .ring-track { fill: none; stroke: var(--surface3); stroke-width: 8; }
+  .ring-fill { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round;
+    transform: rotate(-90deg); transform-origin: 50% 50%;
+    transition: stroke-dashoffset 1s cubic-bezier(.4,0,.2,1);
+  }
+  .ring-label { text-anchor: middle; dominant-baseline: central; fill: var(--text); }
+  .ring-info { flex: 1; }
+  .ring-info .big { font-size: 32px; font-weight: 700; }
+  .ring-info .big span { font-size: 16px; color: var(--text2); font-weight: 400; }
+  .ring-info .sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+  .ring-info .detail { font-size: 12px; color: var(--text3); margin-top: 8px; line-height: 1.7; }
+
+  .deck-section { padding: 24px 24px 0; }
+  .deck-section h2 { font-size: 13px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+  .deck-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .deck-card {
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 18px 16px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: border-color .2s, transform .15s;
+    position: relative; overflow: hidden;
+  }
+  .deck-card::after {
+    content: ''; position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+    background: var(--accent-dim); opacity: 0; transition: opacity .2s;
+  }
+  .deck-card:active { transform: scale(0.97); }
+  .deck-card:active::after { opacity: 1; }
+  .deck-card .dc-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 8px; display: block;
+  }
+  .deck-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .deck-card .dc-count { font-size: 12px; color: var(--text3); }
+  .deck-card .dc-bar { height: 3px; background: var(--surface3); border-radius: 2px; margin-top: 12px; overflow: hidden; }
+  .deck-card .dc-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; }
+
+  .start-btn {
+    margin: 24px;
+    background: var(--accent);
+    color: #0F0F0F;
+    border: none; border-radius: var(--radius);
+    padding: 18px;
+    font-size: 17px; font-weight: 700; font-family: var(--font);
+    width: calc(100% - 48px);
+    cursor: pointer;
+    transition: transform .15s, opacity .15s;
+  }
+  .start-btn:active { transform: scale(0.98); opacity: 0.9; }
+
+  /* ── CARD SCREEN ── */
+  #study {
+    background: var(--bg);
+    padding-top: env(safe-area-inset-top, 48px);
+  }
+  .study-header {
+    padding: 16px 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .back-btn {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--surface); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text); font-size: 20px;
+  }
+  .study-progress-bar {
+    flex: 1; height: 5px; background: var(--surface3); border-radius: 3px; overflow: hidden;
+  }
+  .study-progress-fill {
+    height: 100%; background: var(--accent); border-radius: 3px;
+    transition: width .4s cubic-bezier(.4,0,.2,1);
+  }
+  .study-count { font-size: 13px; color: var(--text2); white-space: nowrap; }
+
+  .card-stack {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: 12px 20px;
+    position: relative;
+  }
+
+  /* Ghost cards behind */
+  .card-ghost {
+    position: absolute;
+    width: calc(100% - 56px);
+    background: var(--surface2);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+  .card-ghost.g1 { height: 420px; transform: scale(0.93) translateY(14px); z-index: 1; }
+  .card-ghost.g2 { height: 420px; transform: scale(0.86) translateY(28px); z-index: 0; }
+
+  .flashcard {
+    width: 100%;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 28px 24px 24px;
+    position: relative; z-index: 2;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+    transition: transform .15s, box-shadow .15s;
+    will-change: transform;
+  }
+  .flashcard:active { cursor: grabbing; }
+  .card-label {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .card-pos { font-size: 11px; font-weight: 600; letter-spacing: .8px; color: var(--text3); text-transform: uppercase; }
+  .card-audio-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--surface2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text2); font-size: 16px;
+    transition: background .2s, color .2s;
+  }
+  .card-audio-btn:active { background: var(--accent-dim); color: var(--accent); }
+  
+  /* Image area */
+  .card-img {
+    width: 100%; aspect-ratio: 16/9;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    margin-bottom: 20px;
+    overflow: hidden; position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card-img .img-placeholder {
+    font-size: 64px; opacity: .5;
+  }
+  .card-img img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+
+  .card-word {
+    font-size: 36px; font-weight: 700; letter-spacing: -1px;
+    margin-bottom: 6px; line-height: 1.15;
+  }
+  .card-phonetic { font-size: 14px; color: var(--text3); margin-bottom: 12px; font-weight: 400; }
+  .card-meaning { font-size: 18px; color: var(--text2); margin-bottom: 16px; font-weight: 500; }
+  .card-sentence {
+    font-size: 14px; color: var(--text3); line-height: 1.7;
+    background: var(--surface2); border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    border-left: 3px solid var(--accent);
+  }
+  .card-sentence em { font-style: normal; color: var(--accent); font-weight: 500; }
+
+  /* Swipe indicators */
+  .swipe-hint-know {
+    position: absolute; top: 28px; left: 24px; right: auto;
+    background: rgba(123,255,106,0.15);
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    border-radius: 8px; padding: 6px 14px;
+    font-size: 15px; font-weight: 700; letter-spacing: 1px;
+    opacity: 0; pointer-events: none;
+  }
+  .swipe-hint-nope {
+    position: absolute; top: 28px; right: 24px; left: auto;
+    background: rgba(255,107,107,0.15);
+    border: 2px solid var(--danger);
+    color: var(--danger);
+    border-radius: 8px; padding: 6px 14px;
+    font-size: 15px; font-weight: 700; letter-spacing: 1px;
+    opacity: 0; pointer-events: none;
+  }
+
+  /* Action buttons */
+  .card-actions {
+    padding: 0 20px 20px;
+    display: flex; gap: 12px;
+  }
+  .action-btn {
+    flex: 1; height: 56px; border: none; border-radius: var(--radius);
+    font-size: 15px; font-weight: 700; font-family: var(--font);
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform .15s, opacity .15s;
+  }
+  .action-btn:active { transform: scale(0.97); opacity: 0.85; }
+  .btn-nope { background: var(--danger-dim); color: var(--danger); border: 1px solid rgba(255,107,107,0.2); }
+  .btn-know { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(123,255,106,0.2); }
+
+  /* ── QUIZ SCREEN ── */
+  #quiz {
+    background: var(--bg);
+    padding-top: env(safe-area-inset-top, 48px);
+  }
+  .quiz-header {
+    padding: 16px 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .quiz-body { flex: 1; padding: 0 20px; overflow-y: auto; }
+  .quiz-q {
+    font-size: 22px; font-weight: 700; margin-bottom: 6px; line-height: 1.3;
+  }
+  .quiz-q-sub { font-size: 14px; color: var(--text2); margin-bottom: 28px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+  .quiz-opt {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 16px 18px;
+    font-size: 16px; font-family: var(--font); color: var(--text);
+    cursor: pointer; text-align: left;
+    transition: border-color .2s, background .2s;
+  }
+  .quiz-opt:active { background: var(--surface2); }
+  .quiz-opt.correct { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+  .quiz-opt.wrong { border-color: var(--danger); background: var(--danger-dim); color: var(--danger); }
+  .quiz-feedback {
+    margin-top: 20px; padding: 16px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 14px; line-height: 1.6;
+    display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(123,255,106,0.2); }
+  .quiz-feedback.wrong { background: var(--danger-dim); color: var(--danger); border: 1px solid rgba(255,107,107,0.2); }
+  .next-quiz-btn {
+    margin: 20px 20px env(safe-area-inset-bottom, 20px);
+    background: var(--accent); color: #0F0F0F;
+    border: none; border-radius: var(--radius);
+    padding: 18px; font-size: 17px; font-weight: 700;
+    font-family: var(--font); width: calc(100% - 40px);
+    cursor: pointer; display: none;
+    transition: transform .15s;
+  }
+  .next-quiz-btn:active { transform: scale(0.98); }
+  .next-quiz-btn.show { display: block; }
+
+  /* ── RESULTS SCREEN ── */
+  #results {
+    background: var(--bg);
+    align-items: center; justify-content: center;
+    padding: 40px 24px env(safe-area-inset-bottom, 24px);
+    text-align: center;
+  }
+  .result-icon { font-size: 72px; margin-bottom: 20px; }
+  .result-title { font-size: 30px; font-weight: 700; margin-bottom: 8px; }
+  .result-sub { font-size: 16px; color: var(--text2); margin-bottom: 32px; line-height: 1.6; }
+  .result-stats {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px; width: 100%; margin-bottom: 32px;
+  }
+  .rs-card {
+    background: var(--surface); border-radius: var(--radius-sm);
+    padding: 16px 8px;
+  }
+  .rs-card .rs-num { font-size: 26px; font-weight: 700; }
+  .rs-card .rs-lbl { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .rs-green { color: var(--accent); }
+  .rs-red { color: var(--danger); }
+  .rs-yellow { color: var(--warning); }
+  .result-btn {
+    width: 100%; padding: 18px; border: none; border-radius: var(--radius);
+    font-size: 17px; font-weight: 700; font-family: var(--font); cursor: pointer;
+    margin-bottom: 10px;
+    transition: transform .15s;
+  }
+  .result-btn:active { transform: scale(0.98); }
+  .btn-primary { background: var(--accent); color: #0F0F0F; }
+  .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: calc(env(safe-area-inset-bottom, 20px) + 80px);
+    left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--surface3); color: var(--text);
+    border-radius: 999px; padding: 10px 22px;
+    font-size: 14px; font-weight: 500;
+    pointer-events: none; opacity: 0;
+    transition: opacity .3s, transform .3s;
+    white-space: nowrap; z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes cardIn {
+    from { opacity: 0; transform: scale(0.9) translateY(30px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .card-enter { animation: cardIn .35s cubic-bezier(.175,.885,.32,1.275) both; }
+
+  @keyframes flyRight {
+    to { transform: translateX(120%) rotate(25deg); opacity: 0; }
+  }
+  @keyframes flyLeft {
+    to { transform: translateX(-120%) rotate(-25deg); opacity: 0; }
+  }
+  .fly-right { animation: flyRight .4s cubic-bezier(.4,0,1,1) forwards; }
+  .fly-left { animation: flyLeft .4s cubic-bezier(.4,0,1,1) forwards; }
+
+  /* ── LOADING STATE ── */
+  .card-img.loading::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div class="screen active" id="home">
+  <div class="home-header">
+    <div class="logo">26s</div>
+    <div class="streak-badge"><span>🔥</span><span id="streak-num">0</span> 天連續</div>
+  </div>
+
+  <div class="home-hero">
+    <h1>記憶單字，<br>只需要 <em>26秒</em>。</h1>
+    <p>用圖像 + 間隔重複，讓單字永遠記住你。</p>
+  </div>
+
+  <div class="progress-ring-wrap">
+    <svg class="ring-svg" width="80" height="80" viewBox="0 0 80 80">
+      <circle class="ring-track" cx="40" cy="40" r="32" />
+      <circle class="ring-fill" id="ring-arc" cx="40" cy="40" r="32"
+        stroke-dasharray="201" stroke-dashoffset="201" />
+      <text class="ring-label" x="40" y="40" font-size="14" font-weight="700"
+        font-family="'Space Grotesk',sans-serif" id="ring-pct">0%</text>
+    </svg>
+    <div class="ring-info">
+      <div class="big" id="today-count">0 <span>/ <span id="daily-target">20</span> 個</span></div>
+      <div class="sub">今日目標</div>
+      <div class="detail" id="review-detail">待複習：<b>0</b> 個<br>今日已學：<b>0</b> 個</div>
+    </div>
+  </div>
+
+  <div class="deck-section">
+    <h2>字庫</h2>
+    <div class="deck-grid" id="deck-grid"></div>
+  </div>
+
+  <button class="start-btn" onclick="startStudy()">開始學習 →</button>
+</div>
+
+<!-- STUDY (FLASHCARD) -->
+<div class="screen" id="study">
+  <div class="study-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="study-progress-bar">
+      <div class="study-progress-fill" id="study-prog" style="width:0%"></div>
+    </div>
+    <div class="study-count" id="study-count">0 / 0</div>
+  </div>
+
+  <div class="card-stack" id="card-stack">
+    <div class="card-ghost g2"></div>
+    <div class="card-ghost g1"></div>
+    <div class="flashcard card-enter" id="flashcard">
+      <div class="swipe-hint-know" id="hint-know">✓ 認識</div>
+      <div class="swipe-hint-nope" id="hint-nope">✗ 不會</div>
+      <div class="card-label">
+        <span class="card-pos" id="card-pos">noun</span>
+        <button class="card-audio-btn" id="audio-btn" onclick="speakWord()">🔊</button>
+      </div>
+      <div class="card-img" id="card-img">
+        <div class="img-placeholder" id="card-emoji">📚</div>
+      </div>
+      <div class="card-word" id="card-word">—</div>
+      <div class="card-phonetic" id="card-phonetic">/ — /</div>
+      <div class="card-meaning" id="card-meaning">—</div>
+      <div class="card-sentence" id="card-sentence">—</div>
+    </div>
+  </div>
+
+  <div class="card-actions">
+    <button class="action-btn btn-nope" onclick="swipeCard('nope')">✗ 不會</button>
+    <button class="action-btn btn-know" onclick="swipeCard('know')">✓ 認識</button>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="quiz">
+  <div class="quiz-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="study-progress-bar">
+      <div class="study-progress-fill" id="quiz-prog" style="width:0%"></div>
+    </div>
+    <div class="study-count" id="quiz-count">0 / 0</div>
+  </div>
+
+  <div class="quiz-body">
+    <div class="quiz-q" id="quiz-q">選出正確的中文意思</div>
+    <div class="quiz-q-sub" id="quiz-word-display">—</div>
+    <div class="quiz-options" id="quiz-options"></div>
+    <div class="quiz-feedback" id="quiz-feedback"></div>
+  </div>
+
+  <button class="next-quiz-btn" id="next-quiz-btn" onclick="nextQuiz()">下一題 →</button>
+</div>
+
+<!-- RESULTS -->
+<div class="screen" id="results">
+  <div class="result-icon" id="result-icon">🎉</div>
+  <div class="result-title" id="result-title">太棒了！</div>
+  <div class="result-sub" id="result-sub">今天的學習完成了</div>
+  <div class="result-stats">
+    <div class="rs-card"><div class="rs-num rs-green" id="rs-know">0</div><div class="rs-lbl">認識</div></div>
+    <div class="rs-card"><div class="rs-num rs-red" id="rs-nope">0</div><div class="rs-lbl">加強</div></div>
+    <div class="rs-card"><div class="rs-num rs-yellow" id="rs-streak">0</div><div class="rs-lbl">連續天</div></div>
+  </div>
+  <button class="result-btn btn-primary" onclick="startStudy()">再練一輪</button>
+  <button class="result-btn btn-secondary" onclick="goHome()">回首頁</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── WORD DATABASE ──
+const VOCAB = [
+  { word: 'eloquent', phonetic: '/ˈɛl.ə.kwənt/', pos: 'adj', zh: '雄辯的；有說服力的', emoji: '🎤',
+    sentence: 'She gave an <em>eloquent</em> speech that moved everyone to tears.',
+    zh_sentence: '她發表了一段雄辯的演講，感動了所有人。' },
+  { word: 'ambiguous', phonetic: '/æmˈbɪɡ.ju.əs/', pos: 'adj', zh: '模稜兩可的；不明確的', emoji: '❓',
+    sentence: 'The contract contained several <em>ambiguous</em> clauses.',
+    zh_sentence: '合同中包含幾個模糊的條款。' },
+  { word: 'resilient', phonetic: '/rɪˈzɪl.i.ənt/', pos: 'adj', zh: '有彈性的；能快速恢復的', emoji: '⚡',
+    sentence: 'Children are often more <em>resilient</em> than adults give them credit for.',
+    zh_sentence: '孩子往往比大人認為的更有韌性。' },
+  { word: 'meticulous', phonetic: '/mɪˈtɪk.jʊ.ləs/', pos: 'adj', zh: '一絲不苟的；細心的', emoji: '🔍',
+    sentence: 'She was <em>meticulous</em> in her research, double-checking every fact.',
+    zh_sentence: '她做研究非常細心，每個事實都仔細核查。' },
+  { word: 'inevitable', phonetic: '/ɪnˈev.ɪ.tə.bəl/', pos: 'adj', zh: '不可避免的；必然的', emoji: '🔄',
+    sentence: 'Change is <em>inevitable</em> in any growing organization.',
+    zh_sentence: '在任何成長中的組織裡，變化是不可避免的。' },
+  { word: 'scrutiny', phonetic: '/ˈskruː.tɪ.ni/', pos: 'noun', zh: '仔細審查；監督', emoji: '🔎',
+    sentence: 'The CEO\'s decisions came under intense <em>scrutiny</em>.',
+    zh_sentence: '執行長的決策受到嚴格的審查。' },
+  { word: 'pragmatic', phonetic: '/præɡˈmæt.ɪk/', pos: 'adj', zh: '務實的；注重實際的', emoji: '⚖️',
+    sentence: 'We need a <em>pragmatic</em> solution, not an idealistic one.',
+    zh_sentence: '我們需要一個務實的解決方案，而非理想化的。' },
+  { word: 'coherent', phonetic: '/kəʊˈhɪər.ənt/', pos: 'adj', zh: '連貫的；有條理的', emoji: '🧩',
+    sentence: 'The essay was well-written and <em>coherent</em>.',
+    zh_sentence: '這篇文章寫得很好，而且條理清晰。' },
+  { word: 'diligent', phonetic: '/ˈdɪl.ɪ.dʒənt/', pos: 'adj', zh: '勤勉的；用功的', emoji: '📖',
+    sentence: 'She was a <em>diligent</em> student who never missed a class.',
+    zh_sentence: '她是個勤奮的學生，從不缺課。' },
+  { word: 'profound', phonetic: '/prəˈfaʊnd/', pos: 'adj', zh: '深刻的；深遠的', emoji: '🌊',
+    sentence: 'The experience had a <em>profound</em> effect on his life.',
+    zh_sentence: '這段經歷對他的人生產生了深遠的影響。' },
+  { word: 'concise', phonetic: '/kənˈsaɪs/', pos: 'adj', zh: '簡潔的；精練的', emoji: '✂️',
+    sentence: 'Please write a <em>concise</em> summary of the report.',
+    zh_sentence: '請寫一個報告的簡潔摘要。' },
+  { word: 'arbitrary', phonetic: '/ˈɑːr.bɪ.trer.i/', pos: 'adj', zh: '任意的；專制的', emoji: '🎲',
+    sentence: 'The rule seemed <em>arbitrary</em> and unfair.',
+    zh_sentence: '這條規則看起來很任意，也不公平。' },
+  { word: 'perspective', phonetic: '/pəˈspek.tɪv/', pos: 'noun', zh: '觀點；看法；透視法', emoji: '👁️',
+    sentence: 'Try to see the issue from a different <em>perspective</em>.',
+    zh_sentence: '試著從不同的角度來看這個問題。' },
+  { word: 'emulate', phonetic: '/ˈem.jʊ.leɪt/', pos: 'verb', zh: '仿效；模擬', emoji: '🪞',
+    sentence: 'He tried to <em>emulate</em> his mentor\'s success.',
+    zh_sentence: '他試著仿效他導師的成功之道。' },
+  { word: 'volatile', phonetic: '/ˈvɒl.ə.taɪl/', pos: 'adj', zh: '易變的；動盪的', emoji: '💥',
+    sentence: 'The stock market has been extremely <em>volatile</em> this week.',
+    zh_sentence: '這週股市極為動盪不安。' },
+  { word: 'leverage', phonetic: '/ˈlev.ər.ɪdʒ/', pos: 'noun/verb', zh: '槓桿；利用', emoji: '🏗️',
+    sentence: 'We can <em>leverage</em> our existing network to grow faster.',
+    zh_sentence: '我們可以利用現有的網絡來加速成長。' },
+  { word: 'surplus', phonetic: '/ˈsɜː.pləs/', pos: 'noun', zh: '剩餘；過剩', emoji: '📦',
+    sentence: 'The company reported a budget <em>surplus</em> for the third quarter.',
+    zh_sentence: '公司報告第三季有預算盈餘。' },
+  { word: 'incentive', phonetic: '/ɪnˈsen.tɪv/', pos: 'noun', zh: '激勵；誘因', emoji: '🏆',
+    sentence: 'Bonuses serve as an <em>incentive</em> for better performance.',
+    zh_sentence: '獎金是提升表現的激勵措施。' },
+  { word: 'substantial', phonetic: '/səbˈstæn.ʃəl/', pos: 'adj', zh: '大量的；重要的', emoji: '🏋️',
+    sentence: 'There was a <em>substantial</em> increase in sales this year.',
+    zh_sentence: '今年的銷售額大幅提升。' },
+  { word: 'implement', phonetic: '/ˈɪm.plɪ.ment/', pos: 'verb', zh: '實施；執行', emoji: '⚙️',
+    sentence: 'The team worked hard to <em>implement</em> the new strategy.',
+    zh_sentence: '團隊努力執行新的策略。' },
+];
+
+const DECKS = [
+  { id: 'toeic', name: 'TOEIC', tag: 'TOEIC', total: 600, done: 47 },
+  { id: 'cee', name: '學測', tag: '學測', total: 1200, done: 213 },
+  { id: 'toefl', name: 'TOEFL', tag: 'TOEFL', total: 900, done: 89 },
+  { id: 'jlpt', name: 'JLPT N2', tag: 'JLPT', total: 700, done: 155 },
+];
+
+// ── STATE ──
+let state = {
+  currentDeck: 0,
+  studyQueue: [],
+  studyIndex: 0,
+  knowList: [],
+  nopeList: [],
+  quizQueue: [],
+  quizIndex: 0,
+  quizScore: 0,
+  streak: parseInt(localStorage.getItem('streak') || '0'),
+  todayDone: parseInt(localStorage.getItem('todayDone') || '0'),
+  lastDate: localStorage.getItem('lastDate') || '',
+};
+
+// ── INIT ──
+function init() {
+  const today = new Date().toDateString();
+  if (state.lastDate !== today) {
+    state.todayDone = 0;
+    localStorage.setItem('todayDone', '0');
+    localStorage.setItem('lastDate', today);
+    if (state.lastDate) {
+      const last = new Date(state.lastDate);
+      const diff = Math.floor((new Date(today) - last) / 86400000);
+      if (diff === 1) {
+        state.streak++;
+      } else if (diff > 1) {
+        state.streak = 0;
+      }
+      localStorage.setItem('streak', state.streak);
+    }
+  }
+  document.getElementById('streak-num').textContent = state.streak;
+  updateHomeStats();
+  renderDecks();
+}
+
+function updateHomeStats() {
+  const target = 20;
+  const done = state.todayDone;
+  const pct = Math.min(100, Math.round(done / target * 100));
+  const circ = 201;
+  const offset = circ - (circ * pct / 100);
+  document.getElementById('ring-arc').style.strokeDashoffset = offset;
+  document.getElementById('ring-pct').textContent = pct + '%';
+  document.getElementById('today-count').innerHTML = done + ' <span>/ <span id="daily-target">' + target + '</span> 個</span>';
+  document.getElementById('review-detail').innerHTML =
+    '待複習：<b>' + state.nopeList.length + '</b> 個<br>今日已學：<b>' + done + '</b> 個';
+}
+
+function renderDecks() {
+  const grid = document.getElementById('deck-grid');
+  grid.innerHTML = DECKS.map((d, i) => {
+    const pct = Math.round(d.done / d.total * 100);
+    return `<div class="deck-card" onclick="selectDeck(${i})">
+      <span class="dc-tag">${d.tag}</span>
+      <h3>${d.name}</h3>
+      <div class="dc-count">${d.done} / ${d.total} 個</div>
+      <div class="dc-bar"><div class="dc-bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function selectDeck(i) {
+  state.currentDeck = i;
+  document.querySelectorAll('.deck-card').forEach((el, idx) => {
+    el.style.borderColor = idx === i ? 'rgba(123,255,106,0.5)' : '';
+  });
+}
+
+// ── NAVIGATION ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goHome() { showScreen('home'); updateHomeStats(); }
+
+// ── STUDY MODE ──
+function startStudy() {
+  state.studyQueue = [...VOCAB].sort(() => Math.random() - .5).slice(0, 10);
+  state.studyIndex = 0;
+  state.knowList = [];
+  state.nopeList = [];
+  showScreen('study');
+  loadCard();
+}
+
+function loadCard() {
+  const card = state.studyQueue[state.studyIndex];
+  if (!card) { finishStudy(); return; }
+
+  const total = state.studyQueue.length;
+  const pct = (state.studyIndex / total * 100).toFixed(0);
+  document.getElementById('study-prog').style.width = pct + '%';
+  document.getElementById('study-count').textContent = `${state.studyIndex + 1} / ${total}`;
+
+  document.getElementById('card-pos').textContent = card.pos;
+  document.getElementById('card-word').textContent = card.word;
+  document.getElementById('card-phonetic').textContent = card.phonetic;
+  document.getElementById('card-meaning').textContent = card.zh;
+  document.getElementById('card-sentence').innerHTML = card.sentence;
+  document.getElementById('card-emoji').textContent = card.emoji;
+  document.getElementById('card-emoji').style.display = '';
+
+  const fc = document.getElementById('flashcard');
+  fc.style.transform = '';
+  fc.classList.remove('fly-left', 'fly-right', 'card-enter');
+  void fc.offsetWidth;
+  fc.classList.add('card-enter');
+  document.getElementById('hint-know').style.opacity = '0';
+  document.getElementById('hint-nope').style.opacity = '0';
+
+  setupSwipe();
+}
+
+function swipeCard(action) {
+  const card = state.studyQueue[state.studyIndex];
+  const fc = document.getElementById('flashcard');
+
+  if (action === 'know') {
+    fc.classList.add('fly-right');
+    state.knowList.push(card);
+  } else {
+    fc.classList.add('fly-left');
+    state.nopeList.push(card);
+  }
+
+  setTimeout(() => {
+    state.studyIndex++;
+    state.todayDone++;
+    localStorage.setItem('todayDone', state.todayDone);
+    loadCard();
+  }, 380);
+}
+
+function finishStudy() {
+  if (state.nopeList.length > 0) {
+    startQuiz();
+  } else {
+    showResults();
+  }
+}
+
+// ── SWIPE GESTURE ──
+function setupSwipe() {
+  const fc = document.getElementById('flashcard');
+  let startX = 0, startY = 0, isDragging = false;
+
+  function onStart(e) {
+    isDragging = true;
+    const pt = e.touches ? e.touches[0] : e;
+    startX = pt.clientX; startY = pt.clientY;
+    fc.style.transition = 'none';
+  }
+  function onMove(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    const pt = e.touches ? e.touches[0] : e;
+    const dx = pt.clientX - startX;
+    const dy = pt.clientY - startY;
+    const rot = dx * 0.06;
+    fc.style.transform = `translateX(${dx}px) translateY(${dy * 0.3}px) rotate(${rot}deg)`;
+    const prog = Math.min(1, Math.abs(dx) / 80);
+    if (dx > 0) {
+      document.getElementById('hint-know').style.opacity = prog;
+      document.getElementById('hint-nope').style.opacity = '0';
+    } else {
+      document.getElementById('hint-nope').style.opacity = prog;
+      document.getElementById('hint-know').style.opacity = '0';
+    }
+  }
+  function onEnd(e) {
+    if (!isDragging) return; isDragging = false;
+    fc.style.transition = '';
+    const pt = e.changedTouches ? e.changedTouches[0] : e;
+    const dx = pt.clientX - startX;
+    if (dx > 70) swipeCard('know');
+    else if (dx < -70) swipeCard('nope');
+    else {
+      fc.style.transform = '';
+      document.getElementById('hint-know').style.opacity = '0';
+      document.getElementById('hint-nope').style.opacity = '0';
+    }
+  }
+
+  fc.removeEventListener('touchstart', fc._ts);
+  fc.removeEventListener('touchmove', fc._tm);
+  fc.removeEventListener('touchend', fc._te);
+  fc.removeEventListener('mousedown', fc._ms);
+  fc.removeEventListener('mousemove', fc._mm);
+  fc.removeEventListener('mouseup', fc._me);
+
+  fc._ts = onStart; fc._tm = onMove; fc._te = onEnd;
+  fc._ms = onStart; fc._mm = onMove; fc._me = onEnd;
+
+  fc.addEventListener('touchstart', onStart, { passive: true });
+  fc.addEventListener('touchmove', onMove, { passive: false });
+  fc.addEventListener('touchend', onEnd);
+  fc.addEventListener('mousedown', onStart);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onEnd);
+}
+
+// ── QUIZ MODE ──
+let quizCards = [];
+let quizIdx = 0;
+let quizKnow = 0;
+
+function startQuiz() {
+  quizCards = [...state.nopeList].sort(() => Math.random() - .5);
+  quizIdx = 0;
+  quizKnow = 0;
+  showScreen('quiz');
+  loadQuiz();
+}
+
+function loadQuiz() {
+  if (quizIdx >= quizCards.length) { showResults(); return; }
+  const card = quizCards[quizIdx];
+  const total = quizCards.length;
+  document.getElementById('quiz-prog').style.width = ((quizIdx / total) * 100) + '%';
+  document.getElementById('quiz-count').textContent = `${quizIdx + 1} / ${total}`;
+  document.getElementById('quiz-q').textContent = '選出正確的中文意思';
+  document.getElementById('quiz-word-display').textContent = `${card.word}  ${card.phonetic}`;
+
+  // Build options: correct + 3 random wrong
+  const wrongPool = VOCAB.filter(v => v.word !== card.word);
+  const wrongs = wrongPool.sort(() => Math.random() - .5).slice(0, 3);
+  const opts = [card, ...wrongs].sort(() => Math.random() - .5);
+
+  const container = document.getElementById('quiz-options');
+  container.innerHTML = opts.map((o, i) =>
+    `<button class="quiz-opt" onclick="answerQuiz(this, '${o.word}', '${card.word}')">${o.zh}</button>`
+  ).join('');
+
+  document.getElementById('quiz-feedback').className = 'quiz-feedback';
+  document.getElementById('quiz-feedback').textContent = '';
+  document.getElementById('next-quiz-btn').className = 'next-quiz-btn';
+}
+
+function answerQuiz(btn, chosen, correct) {
+  if (document.getElementById('next-quiz-btn').classList.contains('show')) return;
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach(b => b.disabled = true);
+
+  const isCorrect = chosen === correct;
+  const card = quizCards[quizIdx];
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    quizKnow++;
+    const fb = document.getElementById('quiz-feedback');
+    fb.className = 'quiz-feedback correct show';
+    fb.innerHTML = `✓ 正確！<br><small style="opacity:.8">${card.sentence.replace(/<[^>]+>/g,'')}</small>`;
+  } else {
+    btn.classList.add('wrong');
+    opts.forEach(b => { if (b.onclick.toString().includes(`'${correct}'`)) b.classList.add('correct'); });
+    const fb = document.getElementById('quiz-feedback');
+    fb.className = 'quiz-feedback wrong show';
+    fb.innerHTML = `✗ 答錯了。正確答案：<b>${card.zh}</b>`;
+  }
+  document.getElementById('next-quiz-btn').classList.add('show');
+}
+
+function nextQuiz() {
+  quizIdx++;
+  loadQuiz();
+}
+
+// ── RESULTS ──
+function showResults() {
+  showScreen('results');
+  const know = state.knowList.length + quizKnow;
+  const nope = state.nopeList.length - quizKnow;
+  document.getElementById('rs-know').textContent = know;
+  document.getElementById('rs-nope').textContent = Math.max(0, nope);
+  document.getElementById('rs-streak').textContent = state.streak;
+
+  if (know >= state.studyQueue.length * 0.8) {
+    document.getElementById('result-icon').textContent = '🎉';
+    document.getElementById('result-title').textContent = '太棒了！';
+    document.getElementById('result-sub').textContent = `今天學了 ${state.studyQueue.length} 個單字，認識率 ${Math.round(know / state.studyQueue.length * 100)}%！`;
+  } else {
+    document.getElementById('result-icon').textContent = '💪';
+    document.getElementById('result-title').textContent = '繼續加油！';
+    document.getElementById('result-sub').textContent = `有 ${Math.max(0,nope)} 個單字需要多複習，明天見！`;
+  }
+
+  // Update streak if first study today
+  const today = new Date().toDateString();
+  if (state.lastDate !== today) {
+    state.streak++;
+    state.lastDate = today;
+    localStorage.setItem('streak', state.streak);
+    localStorage.setItem('lastDate', today);
+    document.getElementById('rs-streak').textContent = state.streak;
+  }
+}
+
+// ── SPEECH ──
+function speakWord() {
+  const word = document.getElementById('card-word').textContent;
+  if (!word || word === '—') return;
+  const u = new SpeechSynthesisUtterance(word);
+  u.lang = 'en-US';
+  u.rate = 0.9;
+  speechSynthesis.speak(u);
+  showToast('🔊 ' + word);
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ── START ──
+init();
+</script>
+
+<!-- PWA Service Worker Registration -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
