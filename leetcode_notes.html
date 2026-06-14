@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeetCode 解題筆記</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1f2937;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #d29922;
+    --accent4: #f85149;
+    --accent5: #bc8cff;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --text-dim: #484f58;
+    --easy: #3fb950;
+    --medium: #d29922;
+    --hard: #f85149;
+    --card-h: 480px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+  }
+
+  .logo span { color: var(--text-muted); font-weight: 400; }
+
+  .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  select:focus { outline: none; border-color: var(--accent); }
+
+  .btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 600; }
+
+  /* ── Stats bar ── */
+  .stats-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 24px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .stat-chip .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+    width: 120px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent5));
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  /* ── Main layout ── */
+  main {
+    display: flex;
+    gap: 20px;
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sidebar-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 4px 8px;
+  }
+
+  .problem-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .problem-list::-webkit-scrollbar { width: 4px; }
+  .problem-list::-webkit-scrollbar-track { background: transparent; }
+  .problem-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .problem-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.1s;
+    border: 1px solid transparent;
+  }
+
+  .problem-item:hover { background: var(--surface2); }
+  .problem-item.active { background: var(--surface2); border-color: var(--accent); }
+
+  .problem-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    min-width: 36px;
+  }
+
+  .problem-title {
+    font-size: 12px;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .difficulty-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .seen-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+    flex-shrink: 0;
+    opacity: 0;
+  }
+
+  .problem-item.seen .seen-dot { opacity: 1; }
+
+  /* ── Card area ── */
+  .card-area {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* ── Flashcard ── */
+  .flashcard-wrapper {
+    perspective: 1200px;
+    height: var(--card-h);
+    margin-bottom: 16px;
+  }
+
+  .flashcard {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .flashcard.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .card-back {
+    transform: rotateY(180deg);
+    overflow-y: auto;
+  }
+
+  .card-back::-webkit-scrollbar { width: 4px; }
+  .card-back::-webkit-scrollbar-track { background: transparent; }
+  .card-back::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* Front card */
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+
+  .card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .problem-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .problem-name {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .tags-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .tag {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid;
+  }
+
+  .tag.easy { color: var(--easy); border-color: var(--easy); background: rgba(63,185,80,0.1); }
+  .tag.medium { color: var(--medium); border-color: var(--medium); background: rgba(210,153,34,0.1); }
+  .tag.hard { color: var(--hard); border-color: var(--hard); background: rgba(248,81,73,0.1); }
+  .tag.topic { color: var(--accent5); border-color: var(--accent5); background: rgba(188,140,255,0.1); }
+
+  .card-badges {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .familiarity-display {
+    display: flex;
+    gap: 4px;
+  }
+
+  .fam-star {
+    font-size: 16px;
+    color: var(--text-dim);
+    transition: color 0.2s;
+  }
+
+  .fam-star.filled { color: var(--accent3); }
+
+  .seen-badge {
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    background: rgba(63,185,80,0.15);
+    color: var(--accent2);
+    border: 1px solid var(--accent2);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .seen-badge.visible { opacity: 1; }
+
+  .card-description {
+    flex: 1;
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text);
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .card-description::-webkit-scrollbar { width: 4px; }
+  .card-description::-webkit-scrollbar-track { background: transparent; }
+  .card-description::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .card-description p { margin-bottom: 10px; }
+
+  .flip-hint {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .flip-hint::before, .flip-hint::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Back card sections */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .strategy-block {
+    margin-bottom: 24px;
+  }
+
+  .strategy-text {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text);
+  }
+
+  .strategy-text ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .strategy-text li {
+    padding: 4px 0 4px 20px;
+    position: relative;
+  }
+
+  .strategy-text li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 11px;
+    top: 6px;
+  }
+
+  /* Code block */
+  .code-block {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent5);
+    font-weight: 600;
+  }
+
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  pre {
+    padding: 16px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #e6edf3;
+    white-space: pre;
+  }
+
+  pre .kw { color: #ff7b72; }
+  pre .type { color: #ffa657; }
+  pre .str { color: #a5d6ff; }
+  pre .comment { color: #8b949e; }
+  pre .num { color: #79c0ff; }
+
+  /* Complexity table */
+  .complexity-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .complexity-table th {
+    background: var(--surface2);
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .complexity-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  .complexity-table tr:last-child td { border-bottom: none; }
+
+  /* ── Controls ── */
+  .controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .control-group {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .nav-btn {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .flip-btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    background: var(--accent);
+    border: none;
+    color: #000;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+    flex: 1;
+  }
+
+  .flip-btn:hover { filter: brightness(1.15); }
+
+  .mark-seen-btn {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--accent2);
+    background: rgba(63,185,80,0.1);
+    color: var(--accent2);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+
+  .mark-seen-btn:hover { background: rgba(63,185,80,0.2); }
+  .mark-seen-btn.marked { background: var(--accent2); color: #000; }
+
+  /* Familiarity picker */
+  .familiarity-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .fam-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .fam-buttons {
+    display: flex;
+    gap: 6px;
+  }
+
+  .fam-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .fam-btn:hover { border-color: var(--accent3); }
+  .fam-btn[data-level="1"].selected { background: rgba(248,81,73,0.2); border-color: var(--accent4); color: var(--accent4); }
+  .fam-btn[data-level="2"].selected { background: rgba(210,153,34,0.2); border-color: var(--accent3); color: var(--accent3); }
+  .fam-btn[data-level="3"].selected { background: rgba(88,166,255,0.2); border-color: var(--accent); color: var(--accent); }
+  .fam-btn[data-level="4"].selected { background: rgba(63,185,80,0.2); border-color: var(--accent2); color: var(--accent2); }
+  .fam-btn[data-level="5"].selected { background: rgba(188,140,255,0.2); border-color: var(--accent5); color: var(--accent5); }
+
+  /* ── Today panel ── */
+  .today-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-top: 20px;
+  }
+
+  .today-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .today-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .today-chip {
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(88,166,255,0.1);
+    border: 1px solid rgba(88,166,255,0.3);
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+
+  .today-chip:hover { background: rgba(88,166,255,0.2); }
+  .today-chip .remove { color: var(--text-muted); font-size: 14px; line-height: 1; }
+
+  .today-empty {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  /* Loading spinner */
+  .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 16px;
+  }
+
+  .spinner {
+    width: 36px; height: 36px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text { font-size: 13px; color: var(--text-muted); }
+
+  /* Counter */
+  .counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 8px 14px;
+    background: var(--surface2);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    main { flex-direction: column; padding: 12px; }
+    .sidebar { width: 100%; }
+    .problem-list { max-height: 200px; flex-direction: row; flex-wrap: wrap; overflow-y: auto; }
+    .problem-item { width: calc(50% - 4px); }
+    .flashcard-wrapper { --card-h: auto; min-height: 420px; }
+  }
+
+  /* Search */
+  .search-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    width: 160px;
+    transition: border-color 0.15s;
+  }
+
+  .search-box:focus { outline: none; border-color: var(--accent); }
+  .search-box::placeholder { color: var(--text-dim); }
+
+  /* AI badge */
+  .ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    background: rgba(188,140,255,0.15);
+    border: 1px solid rgba(188,140,255,0.3);
+    color: var(--accent5);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">LC<span>.notes</span></div>
+  <div class="header-controls">
+    <input type="text" class="search-box" placeholder="搜尋題號或題名..." id="searchBox" />
+    <select id="topicFilter">
+      <option value="all">全部主題</option>
+      <option value="String">字串 String</option>
+      <option value="Array">陣列 Array</option>
+      <option value="Tree">樹 Tree</option>
+      <option value="Graph">圖 Graph</option>
+      <option value="Linked List">鏈結串列</option>
+      <option value="DP">動態規劃 DP</option>
+      <option value="Interval">區間 Interval</option>
+      <option value="Trie">Trie</option>
+      <option value="Design">設計 Design</option>
+      <option value="Binary Search">二元搜尋</option>
+      <option value="Two Pointers">雙指針</option>
+      <option value="Sliding Window">滑動窗口</option>
+      <option value="Math">數學</option>
+      <option value="Bit">位元操作</option>
+      <option value="Backtracking">回溯</option>
+      <option value="Stack">Stack</option>
+      <option value="Heap">Heap</option>
+      <option value="Hash Table">Hash Table</option>
+    </select>
+    <select id="diffFilter">
+      <option value="all">所有難度</option>
+      <option value="Easy">Easy</option>
+      <option value="Medium">Medium</option>
+      <option value="Hard">Hard</option>
+    </select>
+    <button class="btn" id="todayOnlyBtn">📅 今日</button>
+  </div>
+</header>
+
+<div class="stats-bar">
+  <div class="stat-chip">
+    <div class="dot" style="background:var(--accent)"></div>
+    <span id="totalStat">0 題</span>
+  </div>
+  <div class="stat-chip">
+    <div class="dot" style="background:var(--accent2)"></div>
+    <span id="seenStat">今日已看 0 題</span>
+  </div>
+  <div class="stat-chip">
+    <div class="dot" style="background:var(--accent3)"></div>
+    <span id="familiarStat">熟練 0 題</span>
+  </div>
+  <div class="progress-bar" style="margin-left: auto;">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <span style="font-size:12px;color:var(--text-muted)" id="progressLabel">0%</span>
+</div>
+
+<main>
+  <div class="sidebar">
+    <div class="sidebar-title">題目列表</div>
+    <div class="problem-list" id="problemList"></div>
+  </div>
+
+  <div class="card-area">
+    <div class="flashcard-wrapper">
+      <div class="flashcard" id="flashcard">
+        <!-- Front -->
+        <div class="card-face card-front" id="cardFront">
+          <div class="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">載入題目中...</div>
+          </div>
+        </div>
+        <!-- Back -->
+        <div class="card-face card-back" id="cardBack">
+          <div class="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">載入解析中...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <div class="control-group">
+        <button class="nav-btn" id="prevBtn" title="上一題">‹</button>
+        <button class="nav-btn" id="nextBtn" title="下一題">›</button>
+      </div>
+      <span class="counter" id="counter">0 / 0</span>
+      <button class="flip-btn" id="flipBtn">🔄 翻面看解法</button>
+      <button class="mark-seen-btn" id="markSeenBtn">✓ 今日已看</button>
+    </div>
+
+    <!-- Familiarity -->
+    <div class="familiarity-section">
+      <span class="fam-label">熟悉度：</span>
+      <div class="fam-buttons">
+        <button class="fam-btn" data-level="1">😵 不熟</button>
+        <button class="fam-btn" data-level="2">🤔 模糊</button>
+        <button class="fam-btn" data-level="3">👍 了解</button>
+        <button class="fam-btn" data-level="4">💪 熟練</button>
+        <button class="fam-btn" data-level="5">⚡ 秒殺</button>
+      </div>
+    </div>
+
+    <!-- Today panel -->
+    <div class="today-panel">
+      <div class="today-title">
+        <span>📅 今日練習紀錄</span>
+        <button class="btn" id="clearTodayBtn" style="font-size:11px;padding:4px 10px;">清除</button>
+      </div>
+      <div class="today-grid" id="todayGrid">
+        <span class="today-empty">還沒有紀錄，開始刷題吧！</span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ─────────────────────────────────────────
+// DATA — problems from your notes + metadata for all others
+// ─────────────────────────────────────────
+const NOTES_DATA = {
+  58: {
+    title: "Length of Last Word",
+    difficulty: "Easy",
+    topics: ["String"],
+    description: "給一個字串 s，找出最後一個單詞的長度。單詞由空格分隔，最後一個單詞可能前面有多個空格。",
+    strategy: `<ul>
+      <li>用 Split(' ') 切割字串，並移除空白項目（RemoveEmptyEntries）</li>
+      <li>返回最後一個元素的長度即可</li>
+      <li>雙指針做法：從尾部往前掃，先跳過空格，再計算非空格字符數</li>
+    </ul>`,
+    code: `// 方法一：Split
+public int LengthOfLastWord(string s) {
+    string[] words = s.Split(' ',
+        StringSplitOptions.RemoveEmptyEntries);
+    return words[words.Length - 1].Length;
+}
+
+// 方法二：雙指針（從尾部掃描）
+public int LengthOfLastWord(string s) {
+    int length = 0;
+    int i = s.Length - 1;
+    while (i >= 0 && s[i] == ' ') i--;  // 跳過尾部空格
+    while (i >= 0 && s[i] != ' ') { length++; i--; }
+    return length;
+}`,
+    timeComplexity: "O(N)",
+    spaceComplexity: "O(N) / O(1)"
+  },
+  3: {
+    title: "Longest Substring Without Repeating Characters",
+    difficulty: "Medium",
+    topics: ["String", "Sliding Window", "Hash Table"],
+    description: "給一個字串 s，找出不含重複字符的最長子字串長度。",
+    strategy: `<ul>
+      <li>滑動窗口（Sliding Window）+ Queue：維護一個不含重複字符的窗口</li>
+      <li>對每個字符 c：若 Queue 中已含 c，就不斷從頭部 Dequeue 直到移除舊的 c</li>
+      <li>將 c 加入 Queue，更新 maxLen = max(maxLen, Queue.Count)</li>
+      <li>時間複雜度 O(min(N, M))，M 為字符集大小</li>
+    </ul>`,
+    code: `public int LengthOfLongestSubstring(string s) {
+    Queue<char> queue = new Queue<char>();
+    int maxLen = 0;
+    foreach (char c in s) {
+        while (queue.Contains(c))
+            queue.Dequeue();
+        queue.Enqueue(c);
+        maxLen = Math.Max(maxLen, queue.Count);
+    }
+    return maxLen;
+}`,
+    timeComplexity: "O(N)",
+    spaceComplexity: "O(min(N, M))"
+  },
+  6: {
+    title: "Zigzag Conversion",
+    difficulty: "Medium",
+    topics: ["String"],
+    description: "將字串以 ZigZag 模式排列在 numRows 行中，然後按行讀取輸出結果。例如 'PAYPALISHIRING' 以 3 行排列後讀取得到 'PAHNAPLSIGIG YIR'。",
+    strategy: `<ul>
+      <li>建立 numRows 個 StringBuilder，每個代表一行</li>
+      <li>用 curRow 追蹤當前行，goingDown 控制方向</li>
+      <li>當 curRow 到達頂部或底部時，反轉方向</li>
+      <li>最後將所有行的 StringBuilder 拼接輸出</li>
+    </ul>`,
+    code: `public string Convert(string s, int numRows) {
+    if (numRows == 1 || s.Length <= numRows) return s;
+    var rows = new StringBuilder[Math.Min(numRows, s.Length)];
+    for (int i = 0; i < rows.Length; i++)
+        rows[i] = new StringBuilder();
+    int curRow = 0; bool goingDown = false;
+    foreach (char c in s) {
+        rows[curRow].Append(c);
+        if (curRow == 0 || curRow == numRows - 1)
+            goingDown = !goingDown;
+        curRow += goingDown ? 1 : -1;
+    }
+    var result = new StringBuilder();
+    foreach (var row in rows) result.Append(row);
+    return result.ToString();
+}`,
+    timeComplexity: "O(N)",
+    spaceComplexity: "O(N)"
+  },
+  20: {
+    title: "Valid Parentheses",
+    difficulty: "Easy",
+    topics: ["String", "Stack"],
+    description: "給一個只包含 '('、')'、'{'、'}'、'['、']' 的字串，判斷括號是否有效閉合。",
+    strategy: `<ul>
+      <li>用 Stack 處理：遇到左括號 push，遇到右括號則檢查 Stack 頂是否對應</li>
+      <li>若不匹配或 Stack 為空則返回 false</li>
+      <li>最後 Stack 必須為空才表示全部有效閉合</li>
+    </ul>`,
+    code: `public bool IsValid(string s) {
+    var stack = new Stack<char>();
+    foreach (char c in s) {
+        if (c == '(') stack.Push(')');
+        else if (c == '[') stack.Push(']');
+        else if (c == '{') stack.Push('}');
+        else if (stack.Count == 0 || stack.Pop() != c)
+            return false;
+    }
+    return stack.Count == 0;
+}`,
+    timeComplexity: "O(N)",
+    spaceComplexity: "O(N)"
+  },
+  224: {
+    title: "Basic Calculator",
+    difficulty: "Hard",
+    topics: ["String", "Stack", "Math"],
+    description: "實現一個基本計算機，計算包含 '+'、'-'、'(' 和 ')' 的數學表達式字串。",
+    strategy: `<ul>
+      <li>用 Stack 保存當前 total 和 sign，遇到 '(' 時將當前狀態 push</li>
+      <li>遇到 ')' 時 pop 出之前的 sign 和 total 進行合併</li>
+      <li>遍歷字串：數字累積 num；'+'/'-' 更新 total 並重置 sign</li>
+    </ul>`,
+    code: `public int Calculate(string s) {
+    var stack = new Stack<int>();
+    int total = 0, num = 0, sign = 1;
+    for (int i = 0; i < s.Length; i++) {
+        char c = s[i];
+        if (char.IsDigit(c)) {
+            while (i < s.Length && char.IsDigit(s[i]))
+                num = num * 10 + (s[i++] - '0');
+            i--;
+            total += sign * num; num = 0;
+        } else if (c == '+') sign = 1;
+        else if (c == '-') sign = -1;
+        else if (c == '(') {
+            stack.Push(total); stack.Push(sign);
+            total = 0; sign = 1;
+        } else if (c == ')') {
+            total = total * stack.Pop() + stack.Pop();
+        }
+    }
+    return total;
+}`,
+    timeComplexity: "O(N)",
+    spaceComplexity: "O(N)"
+  },
+  290: {
+    title: "Word Pattern",
+    difficulty: "Easy",
+    topics: ["String", "Hash Table"],
+    description: "給一個 pattern 字串和一個 s 字串，判斷 s 是否遵循 pattern 的相同模式（一一對應雙向映射）。",
+    strategy: `<ul>
+      <li>將 s 按空格切分為單詞陣列，若長度不同直接返回 false</li>
+      <li>用 Dictionary 建立 pattern 字元 → 單詞的映射</li>
+      <li>同時用 HashSet 追蹤已被使用的單詞（防止多對一）</li>
+    </ul>`,
+    code: `public bool WordPattern(string pattern, string s) {
+    string[] words = s.Split(' ');
+    if (words.Length != pattern.Length) return false;
+    var map = new Dictionary<char, string>();
+    var used = new HashSet<string>();
+    for (int i = 0; i < pattern.Length; i++) {
+        if (map.ContainsKey(pattern[i])) {
+            if (map[pattern[i]] != words[i]) return false;
+        } else {
+            if (used.Contains(words[i])) return false;
+            map[pattern[i]] = words[i];
+            used.Add(words[i]);
+        }
+    }
+    return true;
+}`,
+    timeComplexity: "O(N)",
+    spaceComplexity: "O(N)"
+  },
+  134: {
+    title: "Gas Station",
+    difficulty: "Medium",
+    topics: ["Array"],
+    description: "N 個加油站排成一圈，gas[i] 是第 i 站的油量，cost[i] 是從第 i 站到下一站的耗油量。找出從哪個起點出發可以繞行一圈，若無解返回 -1。",
+    strategy: `<ul>
+      <li>關鍵定理：若 totalSum >= 0，則一定有解</li>
+      <li>若從某站出發 currentSum < 0，代表這個起點不可行，將 startPosition 設為 i+1</li>
+      <li>重置 currentSum 繼續累加，最終若 totalSum >= 0 則返回 startPosition</li>
+      <li>此貪心策略保證找到最優起點</li>
+    </ul>`,
+    code: `public int CanCompleteCircuit(int[] gas, int[] cost) {
+    int totalSum = 0, currentSum = 0, startPosition = 0;
+    for (int i = 0; i < gas.Length; i++) {
+        int netGas = gas[i] - cost[i];
+        totalSum += netGas;
+        currentSum += netGas;
+        if (currentSum < 0) {
+            startPosition = i + 1;
+            currentSum = 0;
+        }
+    }
+    return totalSum < 0 ? -1 : startPosition;
+}`,
+    timeComplexity: "O(N)",
+    spaceComplexity: "O(1)"
+  },
+  169: {
+    title: "Majority Element",
+    difficulty: "Easy",
+    topics: ["Array"],
+    description: "找出陣列中出現次數超過 n/2 的多數元素。題目保證多數元素一定存在。",
+    strategy: `<ul>
+      <li>Boyer-Moore 投票算法：維護 candidate 和 count</li>
+      <li>count=0 時換 candidate 為當前元素</li>
+      <li>相同則 count++，不同則 count--</li>
+      <li>遍歷結束後 candidate 即為多數元素</li>
+    </ul>`,
+    code: `// Boyer-Moore 投票算法 O(1) 空間
+public int MajorityElement(int[] nums) {
+    int count = 0, candidate = 0;
+    foreach (int num in nums) {
+        if (count == 0) candidate = num;
+        count += (num == candidate) ? 1 : -1;
+    }
+    return candidate;
+}`,
+    timeComplexity: "O(N)",
+    spaceComplexity: "O(1)"
+  },
+  66: {
+    title: "Plus One",
+    difficulty: "Easy",
+    topics: ["Array", "Math"],
+    description: "給一個非負整數陣列表示的數字（最高位在 index 0），在這個數字上加一。",
+    strategy: `<ul>
+      <li>從陣列尾部往前遍歷</li>
+      <li>若當前位 < 9，直接 +1 返回</li>
+      <li>若當前位 = 9，設為 0 繼續進位</li>
+      <li>若整個陣列都是 9（如 [9,9,9]），建立長度+1 的新陣列，首位設為 1</li>
+    </ul>`,
+    code: `public int[] PlusOne(int[] digits) {
+    for (int i = digits.Length - 1; i >= 0; i--) {
+        if (digits[i] < 9) {
+            digits[i]++;
+            return digits;
+        }
+        digits[i] = 0;
+    }
+    int[] result = new int[digits.Length + 1];
+    result[0] = 1;
+    return result;
+}`,
+    timeComplexity: "O(N)",
+    spaceComplexity: "O(1)"
+  },
+  48: {
+    title: "Rotate Image",
+    difficulty: "Medium",
+    topics: ["Array"],
+    description: "原地旋轉一個 n×n 的二維矩陣 90 度（順時針）。必須 in-place 不得使用額外矩陣。",
+    strategy: `<ul>
+      <li>由外到內逐層旋轉（四點同時交換），用 top/bottom/left/right 四個指針</li>
+      <li>或先對矩陣進行轉置（Transpose），再對每一行進行左右翻轉（Reverse）</li>
+      <li>兩步驟合起來等同於順時針旋轉 90 度</li>
+    </ul>`,
+    code: `public void Rotate(int[][] matrix) {
+    int n = matrix.Length;
+    int left = 0, right = n - 1;
+    while (left < right) {
+        int top = left, bottom = right;
+        for (int i = 0; i < right - left; i++) {
+            int topRight = matrix[top][right - i];
+            matrix[top][right-i] = matrix[bottom-i][left];
+            matrix[bottom-i][left] = matrix[bottom][right-i];
+            matrix[bottom][right-i] = matrix[top+i][right];
+            matrix[top+i][right] = topRight;
+        }
+        left++; right--;
+    }
+}`,
+    timeComplexity: "O(N²)",
+    spaceComplexity: "O(1)"
+  },
+  73: {
+    title: "Set Matrix Zeroes",
+    difficulty: "Medium",
+    topics: ["Array"],
+    description: "給一個 m×n 矩陣，若某元素為 0，則將其所在的整行和整列都設為 0，要求 in-place 操作。",
+    strategy: `<ul>
+      <li>用第一行和第一列作為標記（節省額外空間）</li>
+      <li>先記錄 (0,0) 行、列是否有零</li>
+      <li>掃描矩陣，若 matrix[i][j]==0 則將 matrix[i][0] 和 matrix[0][j] 標記為 0</li>
+      <li>從後向前處理，避免標記被提前覆蓋</li>
+    </ul>`,
+    code: `public void SetZeroes(int[][] matrix) {
+    int m = matrix.Length, n = matrix[0].Length;
+    bool fstRowZero = false, fstColZero = false;
+    for (int j = 0; j < n; j++)
+        if (matrix[0][j] == 0) fstRowZero = true;
+    for (int i = 0; i < m; i++)
+        if (matrix[i][0] == 0) fstColZero = true;
+    for (int i = 1; i < m; i++)
+        for (int j = 1; j < n; j++)
+            if (matrix[i][j] == 0) {
+                matrix[i][0] = 0; matrix[0][j] = 0;
+            }
+    for (int i = 1; i < m; i++)
+        for (int j = 1; j < n; j++)
+            if (matrix[i][0] == 0 || matrix[0][j] == 0)
+                matrix[i][j] = 0;
+    if (fstRowZero) for (int j = 0; j < n; j++) matrix[0][j] = 0;
+    if (fstColZero) for (int i = 0; i < m; i++) matrix[i][0] = 0;
+}`,
+    timeComplexity: "O(M×N)",
+    spaceComplexity: "O(1)"
+  },
+  55: {
+    title: "Jump Game",
+    difficulty: "Medium",
+    topics: ["Array"],
+    description: "給一個非負整數陣列，每個元素代表從該位置最多能跳躍的步數，判斷是否能從 index 0 跳到最後一個 index。",
+    strategy: `<ul>
+      <li>維護 maxReachable（當前能到達的最遠位置）</li>
+      <li>遍歷陣列，若當前 index > maxReachable 則無法到達，返回 false</li>
+      <li>否則更新 maxReachable = max(maxReachable, i + nums[i])</li>
+    </ul>`,
+    code: `public bool CanJump(int[] nums) {
+    int maxReachable = 0;
+    for (int i = 0; i < nums.Length; i++) {
+        if (i > maxReachable) return false;
+        maxReachable = Math.Max(maxReachable, i + nums[i]);
+    }
+    return true;
+}`,
+    timeComplexity: "O(N)",
+    spaceComplexity: "O(1)"
+  },
+  112: {
+    title: "Path Sum",
+    difficulty: "Easy",
+    topics: ["Tree"],
+    description: "給一個二叉樹和目標值 targetSum，判斷是否存在從根到葉子節點的路徑使得路徑上所有值的和等於 targetSum。",
+    strategy: `<ul>
+      <li>遞歸 DFS：每次遞歸將 targetSum 減去當前節點值</li>
+      <li>到達葉子節點時（left 和 right 都為 null），檢查 targetSum 是否等於 0</li>
+      <li>左右子樹任一返回 true 即可</li>
+    </ul>`,
+    code: `public bool HasPathSum(TreeNode root, int targetSum) {
+    if (root == null) return false;
+    if (root.left == null && root.right == null)
+        return targetSum - root.val == 0;
+    int remain = targetSum - root.val;
+    return HasPathSum(root.left, remain)
+        || HasPathSum(root.right, remain);
+}`,
+    timeComplexity: "O(N)",
+    spaceComplexity: "O(N) [遞歸棧]"
+  },
+  102: {
+    title: "Binary Tree Level Order Traversal",
+    difficulty: "Medium",
+    topics: ["Tree"],
+    description: "給一棵二叉樹，返回其節點值的層序遍歷結果（逐層從左到右）。",
+    strategy: `<ul>
+      <li>BFS 用 Queue：每次處理一整層（記錄當前層的 size）</li>
+      <li>將每層節點值收集到 List，再加入結果</li>
+      <li>遍歷每層時，將左右子節點加入 Queue</li>
+    </ul>`,
+    code: `public IList<IList<int>> LevelOrder(TreeNode root) {
+    IList<IList<int>> result = new List<IList<int>>();
+    if (root == null) return result;
+    var queue = new Queue<TreeNode>();
+    queue.Enqueue(root);
+    while (queue.Count > 0) {
+        int levelSize = queue.Count;
+        var currentLevel = new List<int>();
+        for (int i = 0; i < levelSize; i++) {
+            var node = queue.Dequeue();
+            currentLevel.Add(node.val);
+            if (node.left != null) queue.Enqueue(node.left);
+            if (node.right != null) queue.Enqueue(node.right);
+        }
+        result.Add(currentLevel);
+    }
+    return result;
+}`,
+    timeComplexity: "O(N)",
+    spaceComplexity: "O(N)"
+  },
+  226: {
+    title: "Invert Binary Tree",
+    difficulty: "Easy",
+    topics: ["Tree"],
+    description: "翻轉一棵二叉樹（左右子樹互換）。",
+    strategy: `<ul>
+      <li>遞歸：對每個節點，先遞歸翻轉左右子樹，再交換 left 和 right 指針</li>
+      <li>也可用 BFS 迭代：每次從佇列取出節點，交換其左右子樹，再將子節點加入佇列</li>
+    </ul>`,
+    code: `public TreeNode InvertTree(TreeNode root) {
+    if (root == null) return null;
+    TreeNode temp = root.left;
+    root.left = InvertTree(root.right);
+    root.right = InvertTree(temp);
+    return root;
+}`,
+    timeComplexity: "O(N)",
+    spaceComplexity: "O(N)"
+  },
+  98: {
+    title: "Validate Binary Search Tree",
+    difficulty: "Medium",
+    topics: ["Tree"],
+    description: "驗證一棵二叉搜尋樹（BST）是否合法。BST 要求：左子樹的所有節點 < 根，右子樹所有節點 > 根，且左右子樹也是合法 BST。",
+    strategy: `<ul>
+      <li>遞歸傳遞合法範圍：IsValidBST(node, min, max)</li>
+      <li>每個節點的值必須在 (min, max) 範圍內</li>
+      <li>向左遞歸時更新 max = node.val；向右遞歸時更新 min = node.val</li>
+    </ul>`,
+    code: `public bool IsValidBST(TreeNode root) {
+    return IsValid(root, long.MinValue, long.MaxValue);
+}
+
+bool IsValid(TreeNode node, long min, long max) {
+    if (node == null) return true;
+    if (node.val <= min || node.val >= max) return false;
+    return IsValid(node.left, min, node.val)
+        && IsValid(node.right, node.val, max);
+}`,
+    timeComplexity: "O(N)",
+    spaceComplexity: "O(N)"
+  },
+  200: {
+    title: "Number of Islands",
+    difficulty: "Medium",
+    topics: ["Graph"],
+    description: "給一個由 '1'（陸地）和 '0'（水）組成的二維網格，計算島嶼的數量。島嶼由水平或垂直相鄰的陸地構成。",
+    strategy: `<ul>
+      <li>遍歷整個網格，每當遇到 '1' 時，島嶼數 +1</li>
+      <li>對該格子進行 BFS，將所有相連的 '1' 標記為已訪問（設為 '0'）</li>
+      <li>BFS：使用 Queue，每次將上下左右的相鄰 '1' 加入佇列</li>
+    </ul>`,
+    code: `public int NumIslands(char[][] grid) {
+    if (grid == null || grid.Length == 0) return 0;
+    int m = grid.Length, n = grid[0].Length;
+    int islandCount = 0;
+    int[] dr = {1,-1,0,0}, dc = {0,0,1,-1};
+    for (int r = 0; r < m; r++) {
+        for (int c = 0; c < n; c++) {
+            if (grid[r][c] == '1') {
+                islandCount++;
+                var queue = new Queue<(int,int)>();
+                queue.Enqueue((r,c)); grid[r][c] = '0';
+                while (queue.Count > 0) {
+                    var (cr,cc) = queue.Dequeue();
+                    for (int d = 0; d < 4; d++) {
+                        int nr = cr+dr[d], nc = cc+dc[d];
+                        if (nr>=0&&nr<m&&nc>=0&&nc<n&&grid[nr][nc]=='1') {
+                            grid[nr][nc]='0';
+                            queue.Enqueue((nr,nc));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return islandCount;
+}`,
+    timeComplexity: "O(M×N)",
+    spaceComplexity: "O(min(M,N))"
+  },
+  130: {
+    title: "Surrounded Regions",
+    difficulty: "Medium",
+    topics: ["Graph"],
+    description: "給一個包含 'X' 和 'O' 的二維矩陣，將所有被 'X' 完全圍住的 'O' 區域翻轉為 'X'（邊界相連的 'O' 不翻轉）。",
+    strategy: `<ul>
+      <li>從四條邊的 'O' 出發，用 BFS 標記所有與邊界相連的 'O'（標記為 '#'）</li>
+      <li>遍歷整個矩陣：'O' → 'X'（被圍住），'#' → 'O'（恢復），'X' 保持不變</li>
+      <li>逆向思維：先找「不被圍住」的區域，其餘全是要翻轉的</li>
+    </ul>`,
+    code: `public void Solve(char[][] board) {
+    if (board == null || board.Length == 0) return;
+    int m = board.Length, n = board[0].Length;
+    var queue = new Queue<(int,int)>();
+    for (int r = 0; r < m; r++) {
+        if (board[r][0] == 'O') queue.Enqueue((r,0));
+        if (board[r][n-1] == 'O') queue.Enqueue((r,n-1));
+    }
+    for (int c = 0; c < n; c++) {
+        if (board[0][c] == 'O') queue.Enqueue((0,c));
+        if (board[m-1][c] == 'O') queue.Enqueue((m-1,c));
+    }
+    int[] dr={1,-1,0,0}, dc={0,0,1,-1};
+    while (queue.Count > 0) {
+        var (r,c) = queue.Dequeue();
+        if (r<0||r>=m||c<0||c>=n||board[r][c]!='O') continue;
+        board[r][c] = '#';
+        for (int d=0;d<4;d++) queue.Enqueue((r+dr[d],c+dc[d]));
+    }
+    for (int r=0;r<m;r++)
+        for (int c=0;c<n;c++)
+            board[r][c] = board[r][c]=='#' ? 'O'
+                        : board[r][c]=='O' ? 'X' : board[r][c];
+}`,
+    timeComplexity: "O(M×N)",
+    spaceComplexity: "O(M×N)"
+  },
+  433: {
+    title: "Minimum Genetic Mutation",
+    difficulty: "Medium",
+    topics: ["Graph"],
+    description: "給起始基因序列和目標序列，以及一個基因庫。每次可以改變一個字符（A/C/G/T 中選），且改變後的序列必須在 bank 中。找到從 start 到 end 的最少變換次數。",
+    strategy: `<ul>
+      <li>經典 BFS 最短路徑問題</li>
+      <li>將 bank 轉為 HashSet 加速查找</li>
+      <li>BFS 每一層代表一次突變，枚舉 8 個位置 × 4 個字符 = 32 種可能</li>
+      <li>若變換後的序列在 bank 中且未訪問過，加入佇列並從 bank 移除（避免重複）</li>
+    </ul>`,
+    code: `public int MinMutation(string startGene, string endGene,
+    string[] bank) {
+    var genebank = new HashSet<string>(bank);
+    if (!genebank.Contains(endGene)) return -1;
+    char[] genes = {'A','C','G','T'};
+    var queue = new Queue<string>();
+    queue.Enqueue(startGene);
+    int mutations = 0;
+    while (queue.Count > 0) {
+        int size = queue.Count;
+        for (int i = 0; i < size; i++) {
+            string current = queue.Dequeue();
+            if (current == endGene) return mutations;
+            char[] arr = current.ToCharArray();
+            for (int j = 0; j < 8; j++) {
+                char orig = arr[j];
+                foreach (char g in genes) {
+                    if (g == orig) continue;
+                    arr[j] = g;
+                    string next = new string(arr);
+                    if (genebank.Contains(next)) {
+                        queue.Enqueue(next);
+                        genebank.Remove(next);
+                    }
+                    arr[j] = orig;
+                }
+            }
+        }
+        mutations++;
+    }
+    return -1;
+}`,
+    timeComplexity: "O(N × 8 × 4)",
+    spaceComplexity: "O(N)"
+  },
+  57: {
+    title: "Insert Interval",
+    difficulty: "Medium",
+    topics: ["Interval", "Array"],
+    description: "給一組已排序且不重疊的區間列表，插入一個新區間，並合併所有重疊的區間。",
+    strategy: `<ul>
+      <li>遍歷現有區間，分三種情況：</li>
+      <li>① 當前區間完全在 newInterval 左側 → 直接加入結果</li>
+      <li>② 當前區間完全在 newInterval 右側 → 若 newInterval 尚未插入則先插入</li>
+      <li>③ 重疊 → 合併：更新 newInterval 的左右邊界（取 min/max）</li>
+    </ul>`,
+    code: `public int[][] Insert(int[][] intervals, int[] newInterval) {
+    var result = new List<int[]>();
+    bool inserted = false;
+    foreach (var current in intervals) {
+        if (current[1] < newInterval[0]) {
+            result.Add(current);          // 在左側
+        } else if (current[0] > newInterval[1]) {
+            if (!inserted) {
+                result.Add(newInterval); inserted = true;
+            }
+            result.Add(current);          // 在右側
+        } else {
+            // 重疊，合併
+            newInterval[0] = Math.Min(newInterval[0], current[0]);
+            newInterval[1] = Math.Max(newInterval[1], current[1]);
+        }
+    }
+    if (!inserted) result.Add(newInterval);
+    return result.ToArray();
+}`,
+    timeComplexity: "O(N)",
+    spaceComplexity: "O(N)"
+  },
+  56: {
+    title: "Merge Intervals",
+    difficulty: "Medium",
+    topics: ["Interval", "Array"],
+    description: "給一個區間陣列，合併所有重疊的區間，返回不重疊的區間陣列。",
+    strategy: `<ul>
+      <li>先按區間起始點排序</li>
+      <li>維護當前合併區間，若下一區間的起始 ≤ 當前終止，則合併（更新終止為 max）</li>
+      <li>否則將當前區間加入結果，更新當前區間為下一個</li>
+    </ul>`,
+    code: `public int[][] Merge(int[][] intervals) {
+    if (intervals.Length <= 1) return intervals;
+    Array.Sort(intervals, (a, b) => a[0].CompareTo(b[0]));
+    var result = new List<int[]>();
+    result.Add(intervals[0]);
+    for (int i = 1; i < intervals.Length; i++) {
+        int[] prev = result[result.Count - 1];
+        int[] curr = intervals[i];
+        if (curr[0] <= prev[1])
+            prev[1] = Math.Max(curr[1], prev[1]);  // 合併
+        else result.Add(curr);
+    }
+    return result.ToArray();
+}`,
+    timeComplexity: "O(N log N)",
+    spaceComplexity: "O(N)"
+  },
+  19: {
+    title: "Remove Nth Node From End of List",
+    difficulty: "Medium",
+    topics: ["Linked List", "Two Pointers"],
+    description: "刪除鏈結串列中倒數第 n 個節點，並返回頭節點。要求一次遍歷完成。",
+    strategy: `<ul>
+      <li>雙指針：fast 先走 n+1 步，然後 fast 和 slow 同時走</li>
+      <li>當 fast 到達尾部時，slow 指向倒數第 n+1 個節點</li>
+      <li>用 dummy 節點簡化邊界情況（如刪除頭節點）</li>
+    </ul>`,
+    code: `public ListNode RemoveNthFromEnd(ListNode head, int n) {
+    var dummy = new ListNode(0); dummy.next = head;
+    ListNode fast = dummy, slow = dummy;
+    for (int i = 0; i < n + 1; i++)
+        fast = fast.next;
+    while (fast != null) {
+        fast = fast.next; slow = slow.next;
+    }
+    slow.next = slow.next.next;  // 刪除節點
+    return dummy.next;
+}`,
+    timeComplexity: "O(N)",
+    spaceComplexity: "O(1)"
+  },
+  21: {
+    title: "Merge Two Sorted Lists",
+    difficulty: "Easy",
+    topics: ["Linked List"],
+    description: "將兩個已排序的鏈結串列合併為一個新的已排序鏈結串列。",
+    strategy: `<ul>
+      <li>建立 dummy 節點作為起始，curr 指向 dummy</li>
+      <li>比較兩個串列的當前節點，將較小者接在 curr 後面</li>
+      <li>其中一個串列為空後，將另一個直接接上</li>
+    </ul>`,
+    code: `public ListNode MergeTwoLists(ListNode list1, ListNode list2) {
+    var dummy = new ListNode(0);
+    ListNode curr = dummy;
+    while (list1 != null && list2 != null) {
+        if (list1.val <= list2.val) {
+            curr.next = list1; list1 = list1.next;
+        } else {
+            curr.next = list2; list2 = list2.next;
+        }
+        curr = curr.next;
+    }
+    curr.next = list1 ?? list2;
+    return dummy.next;
+}`,
+    timeComplexity: "O(M+N)",
+    spaceComplexity: "O(1)"
+  },
+  208: {
+    title: "Implement Trie (Prefix Tree)",
+    difficulty: "Medium",
+    topics: ["Trie", "Design"],
+    description: "實現一個 Trie（前綴樹）資料結構，支持 insert、search、startsWith 三種操作。",
+    strategy: `<ul>
+      <li>每個 TrieNode 包含 children[26]（對應 a-z）和 isEnd 標記</li>
+      <li>Insert：逐字符遍歷，不存在則建立新節點，最後標記 isEnd=true</li>
+      <li>Search：逐字符遍歷，到達最後一個字符後檢查 isEnd</li>
+      <li>StartsWith：同 Search 但不需要檢查 isEnd，路徑存在即可</li>
+    </ul>`,
+    code: `public class TrieNode {
+    public TrieNode[] children = new TrieNode[26];
+    public bool isEnd = false;
+}
+
+public class Trie {
+    private TrieNode root;
+    public Trie() { root = new TrieNode(); }
+
+    public void Insert(string word) {
+        TrieNode curr = root;
+        foreach (char c in word) {
+            int index = c - 'a';
+            if (curr.children[index] == null)
+                curr.children[index] = new TrieNode();
+            curr = curr.children[index];
+        }
+        curr.isEnd = true;
+    }
+
+    public bool Search(string word) {
+        TrieNode curr = root;
+        foreach (char c in word) {
+            int index = c - 'a';
+            if (curr.children[index] == null) return false;
+            curr = curr.children[index];
+        }
+        return curr.isEnd;
+    }
+
+    public bool StartsWith(string prefix) {
+        TrieNode curr = root;
+        foreach (char c in prefix) {
+            int index = c - 'a';
+            if (curr.children[index] == null) return false;
+            curr = curr.children[index];
+        }
+        return true;
+    }
+}`,
+    timeComplexity: "O(M) 每次操作",
+    spaceComplexity: "O(N×26)"
+  },
+  300: {
+    title: "Longest Increasing Subsequence",
+    difficulty: "Medium",
+    topics: ["DP", "Binary Search"],
+    description: "給一個整數陣列，找出其中最長的嚴格遞增子序列的長度。",
+    strategy: `<ul>
+      <li>DP：dp[i] = 以 nums[i] 結尾的最長遞增子序列長度</li>
+      <li>對每個 i，遍歷 j < i，若 nums[j] < nums[i] 則 dp[i] = max(dp[i], dp[j]+1)</li>
+      <li>O(N²) 解法；也可用二分搜尋優化至 O(N log N)</li>
+    </ul>`,
+    code: `// O(N²) DP
+public int LengthOfLIS(int[] nums) {
+    int n = nums.Length;
+    int[] dp = new int[n];
+    Array.Fill(dp, 1);
+    int maxLen = 1;
+    for (int i = 1; i < n; i++) {
+        for (int j = 0; j < i; j++) {
+            if (nums[j] < nums[i])
+                dp[i] = Math.Max(dp[i], dp[j] + 1);
+        }
+        maxLen = Math.Max(maxLen, dp[i]);
+    }
+    return maxLen;
+}`,
+    timeComplexity: "O(N²)",
+    spaceComplexity: "O(N)"
+  },
+  155: {
+    title: "Min Stack",
+    difficulty: "Medium",
+    topics: ["Stack", "Design"],
+    description: "設計一個支持 push、pop、top 和 getMin 操作的 Stack，其中 getMin 必須在 O(1) 時間內返回 Stack 中的最小值。",
+    strategy: `<ul>
+      <li>使用兩個 Stack：一個主 Stack，一個 minStack 追蹤最小值</li>
+      <li>Push 時：若 minStack 為空或新值 ≤ 當前最小值，也 push 到 minStack</li>
+      <li>Pop 時：若 pop 的值等於 minStack 頂部，同時 pop minStack</li>
+      <li>GetMin 直接返回 minStack 頂部</li>
+    </ul>`,
+    code: `public class MinStack {
+    Stack<int> stack = new Stack<int>();
+    Stack<int> minStack = new Stack<int>();
+
+    public void Push(int val) {
+        stack.Push(val);
+        if (minStack.Count == 0 || val <= minStack.Peek())
+            minStack.Push(val);
+    }
+
+    public void Pop() {
+        int val = stack.Pop();
+        if (val == minStack.Peek()) minStack.Pop();
+    }
+
+    public int Top() => stack.Peek();
+    public int GetMin() => minStack.Peek();
+}`,
+    timeComplexity: "O(1) 所有操作",
+    spaceComplexity: "O(N)"
+  }
+};
+
+// Metadata for all 85 problems (title, difficulty, topics)
+const ALL_PROBLEMS_META = {
+  380: { title: "Insert Delete GetRandom O(1)", difficulty: "Medium", topics: ["Design", "Hash Table"] },
+  322: { title: "Coin Change", difficulty: "Medium", topics: ["DP"] },
+  71: { title: "Simplify Path", difficulty: "Medium", topics: ["String", "Stack"] },
+  452: { title: "Minimum Number of Arrows to Burst Balloons", difficulty: "Medium", topics: ["Interval"] },
+  167: { title: "Two Sum II", difficulty: "Medium", topics: ["Two Pointers", "Binary Search"] },
+  222: { title: "Count Complete Tree Nodes", difficulty: "Easy", topics: ["Tree", "Binary Search"] },
+  54: { title: "Spiral Matrix", difficulty: "Medium", topics: ["Array"] },
+  122: { title: "Best Time to Buy and Sell Stock II", difficulty: "Medium", topics: ["Array"] },
+  201: { title: "Bitwise AND of Numbers Range", difficulty: "Medium", topics: ["Bit"] },
+  17: { title: "Letter Combinations of a Phone Number", difficulty: "Medium", topics: ["Backtracking"] },
+  121: { title: "Best Time to Buy and Sell Stock", difficulty: "Easy", topics: ["Array"] },
+  39: { title: "Combination Sum", difficulty: "Medium", topics: ["Backtracking"] },
+  153: { title: "Find Minimum in Rotated Sorted Array", difficulty: "Medium", topics: ["Binary Search"] },
+  36: { title: "Valid Sudoku", difficulty: "Medium", topics: ["Array", "Hash Table"] },
+  127: { title: "Word Ladder", difficulty: "Hard", topics: ["Graph"] },
+  33: { title: "Search in Rotated Sorted Array", difficulty: "Medium", topics: ["Binary Search"] },
+  50: { title: "Pow(x, n)", difficulty: "Medium", topics: ["Math", "Binary Search"] },
+  30: { title: "Substring with Concatenation of All Words", difficulty: "Hard", topics: ["String", "Sliding Window"] },
+  12: { title: "Integer to Roman", difficulty: "Medium", topics: ["String", "Math"] },
+  189: { title: "Rotate Array", difficulty: "Medium", topics: ["Array", "Two Pointers"] },
+  209: { title: "Minimum Size Subarray Sum", difficulty: "Medium", topics: ["Sliding Window", "Two Pointers"] },
+  289: { title: "Game of Life", difficulty: "Medium", topics: ["Array"] },
+  191: { title: "Number of 1 Bits", difficulty: "Easy", topics: ["Bit"] },
+  242: { title: "Valid Anagram", difficulty: "Easy", topics: ["String", "Hash Table"] },
+  100: { title: "Same Tree", difficulty: "Easy", topics: ["Tree"] },
+  133: { title: "Clone Graph", difficulty: "Medium", topics: ["Graph"] },
+  28: { title: "Find the Index of the First Occurrence in a String", difficulty: "Easy", topics: ["String"] },
+  199: { title: "Binary Tree Right Side View", difficulty: "Medium", topics: ["Tree"] },
+  49: { title: "Group Anagrams", difficulty: "Medium", topics: ["String", "Hash Table"] },
+  129: { title: "Sum Root to Leaf Numbers", difficulty: "Medium", topics: ["Tree"] },
+  198: { title: "House Robber", difficulty: "Medium", topics: ["DP"] },
+  392: { title: "Is Subsequence", difficulty: "Easy", topics: ["Two Pointers", "DP"] },
+  74: { title: "Search a 2D Matrix", difficulty: "Medium", topics: ["Binary Search", "Array"] },
+  172: { title: "Factorial Trailing Zeroes", difficulty: "Medium", topics: ["Math"] },
+  23: { title: "Merge k Sorted Lists", difficulty: "Hard", topics: ["Linked List", "Heap"] },
+  72: { title: "Edit Distance", difficulty: "Medium", topics: ["DP"] },
+  105: { title: "Construct Binary Tree from Preorder and Inorder Traversal", difficulty: "Medium", topics: ["Tree"] },
+  42: { title: "Trapping Rain Water", difficulty: "Hard", topics: ["Array", "Two Pointers", "Stack"] },
+  202: { title: "Happy Number", difficulty: "Easy", topics: ["Math", "Hash Table"] },
+  274: { title: "H-Index", difficulty: "Medium", topics: ["Array", "Sorting"] },
+  135: { title: "Candy", difficulty: "Hard", topics: ["Array"] },
+  502: { title: "IPO", difficulty: "Hard", topics: ["Heap", "Array"] },
+  67: { title: "Add Binary", difficulty: "Easy", topics: ["Math", "Bit"] },
+  79: { title: "Word Search", difficulty: "Medium", topics: ["Backtracking", "Array"] },
+  53: { title: "Maximum Subarray", difficulty: "Medium", topics: ["Array", "DP"] },
+  150: { title: "Evaluate Reverse Polish Notation", difficulty: "Medium", topics: ["Stack", "Math"] },
+  236: { title: "Lowest Common Ancestor of a Binary Tree", difficulty: "Medium", topics: ["Tree"] },
+  128: { title: "Longest Consecutive Sequence", difficulty: "Medium", topics: ["Hash Table", "Array"] },
+  114: { title: "Flatten Binary Tree to Linked List", difficulty: "Medium", topics: ["Tree", "Linked List"] },
+  212: { title: "Word Search II", difficulty: "Hard", topics: ["Trie", "Backtracking"] },
+  136: { title: "Single Number", difficulty: "Easy", topics: ["Bit"] },
+  101: { title: "Symmetric Tree", difficulty: "Easy", topics: ["Tree"] },
+  137: { title: "Single Number II", difficulty: "Medium", topics: ["Bit"] },
+  219: { title: "Contains Duplicate II", difficulty: "Easy", topics: ["Array", "Sliding Window", "Hash Table"] },
+  14: { title: "Longest Common Prefix", difficulty: "Easy", topics: ["String"] },
+  221: { title: "Maximal Square", difficulty: "Medium", topics: ["DP", "Array"] },
+  88: { title: "Merge Sorted Array", difficulty: "Easy", topics: ["Array", "Two Pointers"] },
+  383: { title: "Ransom Note", difficulty: "Easy", topics: ["String", "Hash Table"] },
+  27: { title: "Remove Element", difficulty: "Easy", topics: ["Array", "Two Pointers"] },
+  58: { title: "Length of Last Word", difficulty: "Easy", topics: ["String"] },
+  134: { title: "Gas Station", difficulty: "Medium", topics: ["Array"] },
+  ...NOTES_DATA // merge known data
+};
+
+// All problem IDs the user has solved
+const ALL_IDS = [380,322,71,452,167,222,54,122,201,17,121,39,153,36,127,33,21,50,30,12,189,209,289,191,242,100,133,28,199,49,129,198,392,74,172,23,72,105,300,42,202,274,135,502,226,67,79,53,150,236,128,19,73,114,212,169,136,200,155,130,101,290,208,98,55,137,56,102,48,6,66,57,219,224,3,20,112,433,134,58,27,383,14,221,88];
+
+// Build unified problem list
+const PROBLEMS = ALL_IDS.map(id => {
+  const meta = ALL_PROBLEMS_META[id] || {};
+  const note = NOTES_DATA[id] || null;
+  return {
+    id,
+    title: note?.title || meta.title || `Problem #${id}`,
+    difficulty: note?.difficulty || meta.difficulty || "Medium",
+    topics: note?.topics || meta.topics || [],
+    description: note?.description || null,
+    strategy: note?.strategy || null,
+    code: note?.code || null,
+    timeComplexity: note?.timeComplexity || null,
+    spaceComplexity: note?.spaceComplexity || null,
+    hasNotes: !!note
+  };
+}).sort((a, b) => a.id - b.id);
+
+// ─────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────
+let state = {
+  filtered: [...PROBLEMS],
+  currentIdx: 0,
+  isFlipped: false,
+  seenToday: new Set(JSON.parse(localStorage.getItem('lc_seen_today') || '[]')),
+  familiarity: JSON.parse(localStorage.getItem('lc_familiarity') || '{}'),
+  todayFilter: false,
+  aiCache: {},
+  loadingAI: false
+};
+
+// Reset seen list if it's a new day
+const today = new Date().toDateString();
+if (localStorage.getItem('lc_seen_date') !== today) {
+  state.seenToday = new Set();
+  localStorage.setItem('lc_seen_date', today);
+  localStorage.setItem('lc_seen_today', '[]');
+}
+
+function save() {
+  localStorage.setItem('lc_seen_today', JSON.stringify([...state.seenToday]));
+  localStorage.setItem('lc_familiarity', JSON.stringify(state.familiarity));
+}
+
+// ─────────────────────────────────────────
+// RENDER HELPERS
+// ─────────────────────────────────────────
+function diffClass(d) {
+  return d === 'Easy' ? 'easy' : d === 'Hard' ? 'hard' : 'medium';
+}
+
+function renderStars(level) {
+  return [1,2,3,4,5].map(i =>
+    `<span class="fam-star ${i <= level ? 'filled' : ''}">★</span>`
+  ).join('');
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function highlightCode(code) {
+  const keywords = /\b(public|private|void|int|bool|string|char|var|new|return|if|else|while|for|foreach|in|true|false|null|class|static|this|out|ref)\b/g;
+  const types = /\b(List|Dictionary|HashSet|Queue|Stack|StringBuilder|Array|TreeNode|ListNode|TrieNode|Trie|Math|IList|String|Tuple|int\[\]|char\[\])\b/g;
+  let h = escapeHtml(code);
+  h = h.replace(/\/\/.*/g, m => `<span class="comment">${m}</span>`);
+  h = h.replace(keywords, m => `<span class="kw">${m}</span>`);
+  h = h.replace(/\b\d+\b/g, m => `<span class="num">${m}</span>`);
+  return h;
+}
+
+// ─────────────────────────────────────────
+// AI FETCH
+// ─────────────────────────────────────────
+async function fetchAIContent(problem) {
+  if (state.aiCache[problem.id]) return state.aiCache[problem.id];
+  if (problem.hasNotes) return null; // already has data
+
+  const prompt = `你是 LeetCode 解題專家，請用繁體中文提供以下題目的詳細解析。
+
+題目：#${problem.id} ${problem.title}
+難度：${problem.difficulty}
+主題：${problem.topics.join(', ')}
+
+請用以下 JSON 格式回傳（只回傳 JSON，不要有其他文字）：
+{
+  "description": "題目描述（繁體中文，2-4句話）",
+  "strategy": "<ul><li>解題思路第一點</li><li>解題思路第二點</li><li>解題思路第三點</li></ul>",
+  "code": "C# 解法程式碼（完整可執行）",
+  "timeComplexity": "O(N)",
+  "spaceComplexity": "O(1)"
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(b => b.text || '').join('');
+    const clean = text.replace(/```json\n?|\n?```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    state.aiCache[problem.id] = parsed;
+    return parsed;
+  } catch (e) {
+    console.error('AI fetch error:', e);
+    return null;
+  }
+}
+
+// ─────────────────────────────────────────
+// CARD RENDER
+// ─────────────────────────────────────────
+function renderFront(problem) {
+  const fam = state.familiarity[problem.id] || 0;
+  const seen = state.seenToday.has(problem.id);
+  return `
+    <div class="card-header">
+      <div class="card-meta">
+        <div class="problem-id">#${problem.id}</div>
+        <div class="problem-name">${problem.title}</div>
+        <div class="tags-row">
+          <span class="tag ${diffClass(problem.difficulty)}">${problem.difficulty}</span>
+          ${problem.topics.map(t => `<span class="tag topic">${t}</span>`).join('')}
+          ${!problem.hasNotes ? '<span class="ai-badge">✦ AI</span>' : ''}
+        </div>
+      </div>
+      <div class="card-badges">
+        <div class="familiarity-display">${renderStars(fam)}</div>
+        <div class="seen-badge ${seen ? 'visible' : ''}">✓ 今日已看</div>
+      </div>
+    </div>
+    <div class="card-description" id="frontDesc">
+      ${problem.description
+        ? `<p>${problem.description}</p>`
+        : `<div class="loading"><div class="spinner"></div><div class="loading-text">AI 生成題目描述中...</div></div>`
+      }
+    </div>
+    <div class="flip-hint">點擊翻面 或 按 Space 鍵 查看解法</div>
+  `;
+}
+
+function renderBack(problem, aiData) {
+  const desc = problem.description || aiData?.description;
+  const strategy = problem.strategy || aiData?.strategy;
+  const code = problem.code || aiData?.code;
+  const timeC = problem.timeComplexity || aiData?.timeComplexity;
+  const spaceC = problem.spaceComplexity || aiData?.spaceComplexity;
+
+  if (!strategy && !code) {
+    return `<div class="loading"><div class="spinner"></div><div class="loading-text">AI 生成解析中...</div></div>`;
+  }
+
+  return `
+    ${strategy ? `
+    <div class="strategy-block">
+      <div class="section-label">💡 解題思路</div>
+      <div class="strategy-text">${strategy}</div>
+    </div>` : ''}
+
+    ${code ? `
+    <div class="section-label">💻 C# 程式碼</div>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">C#</span>
+        <button class="copy-btn" onclick="copyCode(this)">📋 複製</button>
+      </div>
+      <pre id="codeBlock${problem.id}"><code>${highlightCode(code)}</code></pre>
+    </div>` : ''}
+
+    ${(timeC || spaceC) ? `
+    <div class="section-label">⏱ 複雜度分析</div>
+    <table class="complexity-table">
+      <thead><tr><th>維度</th><th>複雜度</th></tr></thead>
+      <tbody>
+        ${timeC ? `<tr><td style="color:var(--text-muted);font-family:inherit">時間 Time</td><td>${timeC}</td></tr>` : ''}
+        ${spaceC ? `<tr><td style="color:var(--text-muted);font-family:inherit">空間 Space</td><td>${spaceC}</td></tr>` : ''}
+      </tbody>
+    </table>` : ''}
+  `;
+}
+
+window.copyCode = function(btn) {
+  const problem = state.filtered[state.currentIdx];
+  const code = problem.code || state.aiCache[problem.id]?.code || '';
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = '✓ 已複製';
+    setTimeout(() => btn.textContent = '📋 複製', 2000);
+  });
+};
+
+// ─────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────
+async function showProblem(idx) {
+  if (state.filtered.length === 0) {
+    document.getElementById('cardFront').innerHTML = '<div class="loading"><div class="loading-text">沒有符合的題目</div></div>';
+    document.getElementById('cardBack').innerHTML = '';
+    document.getElementById('counter').textContent = '0 / 0';
+    return;
+  }
+
+  idx = Math.max(0, Math.min(idx, state.filtered.length - 1));
+  state.currentIdx = idx;
+
+  // Reset flip
+  if (state.isFlipped) {
+    document.getElementById('flashcard').classList.remove('flipped');
+    state.isFlipped = false;
+    document.getElementById('flipBtn').textContent = '🔄 翻面看解法';
+  }
+
+  const problem = state.filtered[idx];
+
+  // Render front immediately
+  document.getElementById('cardFront').innerHTML = renderFront(problem);
+  document.getElementById('cardBack').innerHTML = renderBack(problem, state.aiCache[problem.id] || null);
+
+  // Update sidebar selection
+  document.querySelectorAll('.problem-item').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.id) === problem.id);
+  });
+
+  // Scroll sidebar item into view
+  const activeItem = document.querySelector('.problem-item.active');
+  if (activeItem) activeItem.scrollIntoView({ block: 'nearest' });
+
+  // Update controls
+  document.getElementById('prevBtn').disabled = idx === 0;
+  document.getElementById('nextBtn').disabled = idx === state.filtered.length - 1;
+  document.getElementById('counter').textContent = `${idx + 1} / ${state.filtered.length}`;
+
+  const seen = state.seenToday.has(problem.id);
+  const seenBtn = document.getElementById('markSeenBtn');
+  seenBtn.textContent = seen ? '✓ 今日已看' : '○ 標記今日';
+  seenBtn.classList.toggle('marked', seen);
+
+  // Update familiarity buttons
+  const fam = state.familiarity[problem.id] || 0;
+  document.querySelectorAll('.fam-btn').forEach(btn => {
+    btn.classList.toggle('selected', parseInt(btn.dataset.level) === fam);
+  });
+
+  // Fetch AI if needed
+  if (!problem.hasNotes && !state.aiCache[problem.id]) {
+    const aiData = await fetchAIContent(problem);
+    if (aiData && state.filtered[state.currentIdx]?.id === problem.id) {
+      // Update the problem with AI data
+      Object.assign(problem, {
+        description: aiData.description,
+        strategy: aiData.strategy,
+        code: aiData.code,
+        timeComplexity: aiData.timeComplexity,
+        spaceComplexity: aiData.spaceComplexity,
+      });
+      // Re-render
+      document.getElementById('cardFront').innerHTML = renderFront(problem);
+      document.getElementById('cardBack').innerHTML = renderBack(problem, aiData);
+    }
+  }
+}
+
+function flip() {
+  state.isFlipped = !state.isFlipped;
+  document.getElementById('flashcard').classList.toggle('flipped', state.isFlipped);
+  document.getElementById('flipBtn').textContent = state.isFlipped ? '🔄 看題目' : '🔄 翻面看解法';
+}
+
+// ─────────────────────────────────────────
+// FILTERS
+// ─────────────────────────────────────────
+function applyFilters() {
+  const topic = document.getElementById('topicFilter').value;
+  const diff = document.getElementById('diffFilter').value;
+  const search = document.getElementById('searchBox').value.toLowerCase();
+
+  state.filtered = PROBLEMS.filter(p => {
+    if (topic !== 'all' && !p.topics.includes(topic)) return false;
+    if (diff !== 'all' && p.difficulty !== diff) return false;
+    if (search && !p.title.toLowerCase().includes(search) && !String(p.id).includes(search)) return false;
+    if (state.todayFilter && !state.seenToday.has(p.id)) return false;
+    return true;
+  });
+
+  renderSidebar();
+  showProblem(0);
+  updateStats();
+}
+
+// ─────────────────────────────────────────
+// SIDEBAR
+// ─────────────────────────────────────────
+function renderSidebar() {
+  const list = document.getElementById('problemList');
+  list.innerHTML = state.filtered.map((p, i) => {
+    const seen = state.seenToday.has(p.id);
+    return `<div class="problem-item ${seen ? 'seen' : ''}" data-id="${p.id}" onclick="showProblem(${i})">
+      <span class="problem-num">#${p.id}</span>
+      <span class="problem-title">${p.title}</span>
+      <span class="seen-dot"></span>
+      <span class="difficulty-dot" style="background:var(--${diffClass(p.difficulty)})"></span>
+    </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────
+// STATS
+// ─────────────────────────────────────────
+function updateStats() {
+  const total = state.filtered.length;
+  const seen = state.filtered.filter(p => state.seenToday.has(p.id)).length;
+  const famCount = Object.values(state.familiarity).filter(v => v >= 4).length;
+  const pct = total ? Math.round((seen / total) * 100) : 0;
+
+  document.getElementById('totalStat').textContent = `${total} 題`;
+  document.getElementById('seenStat').textContent = `今日已看 ${seen} 題`;
+  document.getElementById('familiarStat').textContent = `熟練 ${famCount} 題`;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = pct + '%';
+}
+
+// ─────────────────────────────────────────
+// TODAY PANEL
+// ─────────────────────────────────────────
+function renderTodayPanel() {
+  const grid = document.getElementById('todayGrid');
+  if (state.seenToday.size === 0) {
+    grid.innerHTML = '<span class="today-empty">還沒有紀錄，開始刷題吧！</span>';
+    return;
+  }
+  grid.innerHTML = [...state.seenToday].map(id => {
+    const p = PROBLEMS.find(x => x.id === id);
+    return `<div class="today-chip" onclick="jumpToId(${id})">
+      #${id}
+      <span class="remove" onclick="removeSeen(event, ${id})">×</span>
+    </div>`;
+  }).join('');
+}
+
+window.jumpToId = function(id) {
+  const idx = state.filtered.findIndex(p => p.id === id);
+  if (idx >= 0) showProblem(idx);
+};
+
+window.removeSeen = function(e, id) {
+  e.stopPropagation();
+  state.seenToday.delete(id);
+  save();
+  renderTodayPanel();
+  updateStats();
+  renderSidebar();
+  // Refresh seen badge if this is current
+  const cur = state.filtered[state.currentIdx];
+  if (cur?.id === id) {
+    const btn = document.getElementById('markSeenBtn');
+    btn.textContent = '○ 標記今日';
+    btn.classList.remove('marked');
+    document.getElementById('cardFront').innerHTML = renderFront(cur);
+  }
+};
+
+// ─────────────────────────────────────────
+// EVENT LISTENERS
+// ─────────────────────────────────────────
+document.getElementById('flipBtn').addEventListener('click', flip);
+document.getElementById('flashcard').addEventListener('click', flip);
+
+document.getElementById('prevBtn').addEventListener('click', () => {
+  showProblem(state.currentIdx - 1);
+});
+document.getElementById('nextBtn').addEventListener('click', () => {
+  showProblem(state.currentIdx + 1);
+});
+
+document.getElementById('markSeenBtn').addEventListener('click', () => {
+  const p = state.filtered[state.currentIdx];
+  if (!p) return;
+  if (state.seenToday.has(p.id)) {
+    state.seenToday.delete(p.id);
+  } else {
+    state.seenToday.add(p.id);
+  }
+  save();
+  renderTodayPanel();
+  updateStats();
+  renderSidebar();
+  const seen = state.seenToday.has(p.id);
+  document.getElementById('markSeenBtn').textContent = seen ? '✓ 今日已看' : '○ 標記今日';
+  document.getElementById('markSeenBtn').classList.toggle('marked', seen);
+  document.getElementById('cardFront').innerHTML = renderFront(p);
+});
+
+document.querySelectorAll('.fam-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const p = state.filtered[state.currentIdx];
+    if (!p) return;
+    const level = parseInt(btn.dataset.level);
+    state.familiarity[p.id] = level;
+    save();
+    document.querySelectorAll('.fam-btn').forEach(b => {
+      b.classList.toggle('selected', parseInt(b.dataset.level) === level);
+    });
+    document.getElementById('cardFront').innerHTML = renderFront(p);
+    updateStats();
+  });
+});
+
+document.getElementById('topicFilter').addEventListener('change', applyFilters);
+document.getElementById('diffFilter').addEventListener('change', applyFilters);
+document.getElementById('searchBox').addEventListener('input', applyFilters);
+
+document.getElementById('todayOnlyBtn').addEventListener('click', () => {
+  state.todayFilter = !state.todayFilter;
+  document.getElementById('todayOnlyBtn').classList.toggle('active', state.todayFilter);
+  applyFilters();
+});
+
+document.getElementById('clearTodayBtn').addEventListener('click', () => {
+  if (confirm('確定要清除今日紀錄嗎？')) {
+    state.seenToday = new Set();
+    save();
+    renderTodayPanel();
+    updateStats();
+    renderSidebar();
+    const p = state.filtered[state.currentIdx];
+    if (p) document.getElementById('cardFront').innerHTML = renderFront(p);
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); }
+  if (e.key === 'ArrowLeft') showProblem(state.currentIdx - 1);
+  if (e.key === 'ArrowRight') showProblem(state.currentIdx + 1);
+});
+
+// ─────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────
+applyFilters();
+renderTodayPanel();
+</script>
+</body>
+</html>
